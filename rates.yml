@@ -1,0 +1,13 @@
+# Global rate multipliers — these are what every RSPS exposes as "the server admin's drop rate knob".
+# When you see someone in OSRS claim they "altered the drop rate" they almost certainly meant
+# editing a YAML like this on a 317 server they admin.
+
+drop_rate_multiplier: 1.0        # 1.0 = OSRS authentic. 5.0 = 5x rates. 100.0 = comedy server.
+rare_drop_multiplier: 1.0        # Applies to entries flagged "rare: true" in drop_tables.yml.
+gp_multiplier: 1.0               # Multiplies any "Coins" quantity range.
+xp_multiplier: 1.0               # XP per kill multiplier (used by full Apollo wiring).
+
+# Pity counter — if true, the engine tracks dry streaks per NPC and force-rolls a rare after
+# (configured_odds * pity_threshold) kills. Not authentic OSRS behavior; pure RSPS comfort feature.
+pity_enabled: false
+pity_threshold: 3.0

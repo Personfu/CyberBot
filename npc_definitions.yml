@@ -1,0 +1,9 @@
+# NPC definitions — combat-relevant fields used by the demo simulator.
+# Real OSRS NPC IDs are provided for cross-reference with the 317 client cache.
+
+"Chicken":           {id:   41, combat_level:   1, hitpoints:    3, kill_time_seconds: 2}
+"Cow":               {id:   81, combat_level:   2, hitpoints:    8, kill_time_seconds: 3}
+"Gargoyle":          {id: 1543, combat_level: 111, hitpoints:  105, kill_time_seconds: 32}
+"Vorkath":           {id: 8059, combat_level: 732, hitpoints: 1000, kill_time_seconds: 90}
+"Zulrah":            {id: 2042, combat_level: 725, hitpoints:  500, kill_time_seconds: 110}
+"General Graardor":  {id: 2215, combat_level: 624, hitpoints:  255, kill_time_seconds: 120}

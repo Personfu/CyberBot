@@ -1,0 +1,59 @@
+# Item definitions — partial table for the items referenced by the included drop tables.
+# In a full Apollo server, this lives in a binary cache extracted from the 317 client cache.
+# Here it's exposed as YAML so you can edit values directly.
+#
+# Real OSRS item IDs are provided for reference — they MUST match the 317 client's cache for
+# rendering to work. The "ge_price" field is what the demo's GP/hr math uses.
+
+"Coins":                {id:    995, ge_price: 1,             stackable: true}
+"Bones":                {id:    526, ge_price: 100,           stackable: false}
+"Big bones":            {id:    532, ge_price: 280,           stackable: false}
+"Feather":              {id:    314, ge_price: 2,             stackable: true}
+"Raw chicken":          {id:   2138, ge_price: 30,            stackable: false}
+"Raw beef":             {id:   2132, ge_price: 50,            stackable: false}
+"Cowhide":              {id:   1739, ge_price: 130,           stackable: false}
+
+"Mossy key":            {id:  22374, ge_price: 35000,         stackable: true}
+"Granite maul":         {id:   4153, ge_price: 33500,         stackable: false}
+"Steel battleaxe":      {id:   1365, ge_price: 350,           stackable: false}
+"Mithril kiteshield":   {id:   1199, ge_price: 1100,          stackable: false}
+"Rune dagger":          {id:   1213, ge_price: 4400,          stackable: false}
+"Adamant 2h sword":     {id:   1317, ge_price: 1300,          stackable: false}
+"Mithril boots":        {id:   3795, ge_price: 770,           stackable: false}
+"Pure essence":         {id:   7936, ge_price: 4,             stackable: true}
+"Mithril ore":          {id:    447, ge_price: 65,            stackable: true}
+
+"Vorkath's head":       {id:  21907, ge_price: 0,             stackable: false, untradeable: true}
+"Superior dragon bones":{id:  22124, ge_price: 11000,         stackable: false}
+"Blue dragonhide":      {id:   1751, ge_price: 1500,          stackable: false}
+"Dragon arrowtips":     {id:  11237, ge_price: 320,           stackable: true}
+"Dragonbone necklace":  {id:  22111, ge_price: 800000,        stackable: false}
+"Skeletal visage":      {id:  22006, ge_price: 1900000,       stackable: false}
+"Draconic visage":      {id:   1749, ge_price: 4900000,       stackable: false}
+"Jar of decay":         {id:  22104, ge_price: 90000,         stackable: false}
+"Vorki":                {id:  21992, ge_price: 0,             stackable: false, untradeable: true}
+"Battlestaff":          {id:   1391, ge_price: 7500,          stackable: false}
+"Rune dart":            {id:    811, ge_price: 50,            stackable: true}
+
+"Zulrah's scales":      {id:  12934, ge_price: 100,           stackable: true}
+"Snakeskin":            {id:   6287, ge_price: 130,           stackable: false}
+"Dragon med helm":      {id:   1149, ge_price: 60000,         stackable: false}
+"Magic fang":           {id:  12932, ge_price: 1800000,       stackable: false}
+"Tanzanite mutagen":    {id:  13200, ge_price: 35000000,      stackable: false}
+"Magma mutagen":        {id:  13201, ge_price: 35000000,      stackable: false}
+"Tanzanite fang":       {id:  12922, ge_price: 16000000,      stackable: false}
+"Toxic blowpipe (empty)":{id: 12924, ge_price: 1700000,       stackable: false}
+"Serpentine visage":    {id:  12927, ge_price: 7000000,       stackable: false}
+"Pet snakeling":        {id:  12921, ge_price: 0,             stackable: false, untradeable: true}
+"Manta ray":            {id:    391, ge_price: 1500,          stackable: false}
+"Magic seed":           {id:   5316, ge_price: 110000,        stackable: false}
+"Onyx bolt tips":       {id:   9194, ge_price: 7500,          stackable: true}
+
+"Bandos chestplate":    {id:  11832, ge_price: 26000000,      stackable: false}
+"Bandos tassets":       {id:  11834, ge_price: 28000000,      stackable: false}
+"Bandos boots":         {id:  11840, ge_price: 200000,        stackable: false}
+"Bandos hilt":          {id:  11810, ge_price: 17500000,      stackable: false}
+"Pet general graardor": {id:  12650, ge_price: 0,             stackable: false, untradeable: true}
+"Rune sword":           {id:   1289, ge_price: 17500,         stackable: false}
+"Rune 2h sword":        {id:   1319, ge_price: 38000,         stackable: false}
+"Coal":                 {id:    453, ge_price: 165,           stackable: true}

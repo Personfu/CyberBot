@@ -1,0 +1,118 @@
+# Drop tables — schema:
+#   <NpcName>:
+#     always:                # rolled every kill, no chance
+#       - item: "Item name"
+#         quantity: 1                  # exact value
+#         quantity_range: [min, max]   # OR a range, engine picks uniformly
+#     rolls: N               # how many independent rolls against the weighted table per kill
+#     weighted_total: WEIGHT # sum of all weights below (engine validates)
+#     entries:
+#       - item: "Item name"
+#         quantity: 1
+#         weight: W
+#         rare: true|false              # if true, multiplied by rare_drop_multiplier from rates.yml
+
+Chicken:
+  always:
+    - item: "Bones"
+      quantity: 1
+    - item: "Raw chicken"
+      quantity: 1
+    - item: "Feather"
+      quantity_range: [5, 15]
+  rolls: 0
+  weighted_total: 0
+  entries: []
+
+Cow:
+  always:
+    - item: "Bones"
+      quantity: 1
+    - item: "Cowhide"
+      quantity: 1
+    - item: "Raw beef"
+      quantity: 1
+  rolls: 0
+  weighted_total: 0
+  entries: []
+
+Gargoyle:
+  always:
+    - item: "Bones"
+      quantity: 1
+  rolls: 1
+  weighted_total: 256
+  entries:
+    - {item: "Coins",                quantity_range: [400, 2000], weight: 80}
+    - {item: "Steel battleaxe",      quantity: 1,                 weight: 12}
+    - {item: "Mithril kiteshield",   quantity: 1,                 weight: 10}
+    - {item: "Rune dagger",          quantity: 1,                 weight: 6}
+    - {item: "Adamant 2h sword",     quantity: 1,                 weight: 5}
+    - {item: "Mithril boots",        quantity: 1,                 weight: 4}
+    - {item: "Granite maul",         quantity: 1,                 weight: 1, rare: true}
+    - {item: "Coins",                quantity_range: [3000, 10000], weight: 22}
+    - {item: "Pure essence",         quantity_range: [25, 100],   weight: 36}
+    - {item: "Mithril ore",          quantity_range: [5, 15],     weight: 30}
+    - {item: "Mossy key",            quantity: 1,                 weight: 50}
+
+# Vorkath — high-end PvM, ~2-3M GP/hr in real OSRS. Note the rare table at weight 1 each.
+Vorkath:
+  always:
+    - item: "Vorkath's head"
+      quantity: 1
+    - item: "Superior dragon bones"
+      quantity: 1
+    - item: "Blue dragonhide"
+      quantity: 2
+  rolls: 1
+  weighted_total: 128
+  entries:
+    - {item: "Coins",                  quantity_range: [50000, 200000], weight: 60}
+    - {item: "Dragon arrowtips",       quantity_range: [225, 525],      weight: 20}
+    - {item: "Dragonbone necklace",    quantity: 1,                     weight: 5, rare: true}
+    - {item: "Skeletal visage",        quantity: 1,                     weight: 3, rare: true}
+    - {item: "Draconic visage",        quantity: 1,                     weight: 2, rare: true}
+    - {item: "Jar of decay",           quantity: 1,                     weight: 1, rare: true}
+    - {item: "Vorki",                  quantity: 1,                     weight: 1, rare: true}
+    - {item: "Battlestaff",            quantity_range: [15, 30],        weight: 12}
+    - {item: "Rune dart",              quantity_range: [120, 250],      weight: 24}
+
+# Zulrah — rotation-based boss, ~2.5M GP/hr in real OSRS.
+Zulrah:
+  always:
+    - item: "Zulrah's scales"
+      quantity_range: [100, 299]
+  rolls: 1
+  weighted_total: 512
+  entries:
+    - {item: "Coins",                  quantity_range: [25000, 100000], weight: 200}
+    - {item: "Snakeskin",              quantity_range: [40, 80],        weight: 80}
+    - {item: "Dragon med helm",        quantity: 1,                     weight: 30}
+    - {item: "Magic fang",             quantity: 1,                     weight: 4, rare: true}
+    - {item: "Tanzanite mutagen",      quantity: 1,                     weight: 1, rare: true}
+    - {item: "Magma mutagen",          quantity: 1,                     weight: 1, rare: true}
+    - {item: "Tanzanite fang",         quantity: 1,                     weight: 2, rare: true}
+    - {item: "Toxic blowpipe (empty)", quantity: 1,                     weight: 2, rare: true}
+    - {item: "Serpentine visage",      quantity: 1,                     weight: 2, rare: true}
+    - {item: "Pet snakeling",          quantity: 1,                     weight: 1, rare: true}
+    - {item: "Manta ray",              quantity_range: [50, 100],       weight: 60}
+    - {item: "Magic seed",             quantity_range: [2, 5],          weight: 32}
+    - {item: "Onyx bolt tips",         quantity_range: [25, 60],        weight: 97}
+
+# General Graardor (Bandos boss) — ~1.5M GP/hr in groups in real OSRS.
+"General Graardor":
+  always:
+    - item: "Big bones"
+      quantity: 1
+  rolls: 1
+  weighted_total: 384
+  entries:
+    - {item: "Coins",                  quantity_range: [19500, 27000],  weight: 250}
+    - {item: "Bandos chestplate",      quantity: 1,                     weight: 3, rare: true}
+    - {item: "Bandos tassets",         quantity: 1,                     weight: 3, rare: true}
+    - {item: "Bandos boots",           quantity: 1,                     weight: 4, rare: true}
+    - {item: "Bandos hilt",            quantity: 1,                     weight: 5, rare: true}
+    - {item: "Pet general graardor",   quantity: 1,                     weight: 1, rare: true}
+    - {item: "Rune sword",             quantity: 1,                     weight: 40}
+    - {item: "Rune 2h sword",          quantity_range: [1, 1],          weight: 30}
+    - {item: "Coal",                   quantity_range: [70, 90],        weight: 48}
