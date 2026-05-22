@@ -202,13 +202,32 @@ public class DropTableEngine {
         try (var in = Files.newInputStream(path)) {
             raw = yaml.load(in);
         }
-        double drop = ((Number) raw.getOrDefault("drop_rate_multiplier", 1.0)).doubleValue();
-        double rare = ((Number) raw.getOrDefault("rare_drop_multiplier", 1.0)).doubleValue();
-        double gp   = ((Number) raw.getOrDefault("gp_multiplier", 1.0)).doubleValue();
-        double xp   = ((Number) raw.getOrDefault("xp_multiplier", 1.0)).doubleValue();
+        double drop = overrideRate("drop_rate_multiplier",
+            ((Number) raw.getOrDefault("drop_rate_multiplier", 1.0)).doubleValue());
+        double rare = overrideRate("rare_drop_multiplier",
+            ((Number) raw.getOrDefault("rare_drop_multiplier", 1.0)).doubleValue());
+        double gp = overrideRate("gp_multiplier",
+            ((Number) raw.getOrDefault("gp_multiplier", 1.0)).doubleValue());
+        double xp = overrideRate("xp_multiplier",
+            ((Number) raw.getOrDefault("xp_multiplier", 1.0)).doubleValue());
         boolean pity = Boolean.TRUE.equals(raw.getOrDefault("pity_enabled", false));
         double pityThreshold = ((Number) raw.getOrDefault("pity_threshold", 3.0)).doubleValue();
         return new Rates(drop, rare, gp, xp, pity, pityThreshold);
+    }
+
+    private double overrideRate(String key, double fallback) {
+        String value = System.getProperty(key);
+        if (value == null || value.isBlank()) {
+            value = System.getenv(key.toUpperCase());
+        }
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        try {
+            return Double.parseDouble(value.trim());
+        } catch (NumberFormatException ignored) {
+            return fallback;
+        }
     }
 
     public static class DropResult {
