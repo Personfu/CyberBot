@@ -45,6 +45,8 @@ import java.util.Scanner;
  * table, same engine, vastly different output. THAT is the server-admin power.
  */
 public class DropTableDemo {
+    private static final int GUI_TEXT_AREA_ROWS = 22;
+    private static final int GUI_TEXT_AREA_COLUMNS = 110;
 
     public static void main(String[] args) throws Exception {
         CliOptions options = parseArgs(args);
@@ -85,7 +87,7 @@ public class DropTableDemo {
         }
 
         if (!engine.dropTables().containsKey(npcName)) {
-            throw new IllegalArgumentException("Unknown NPC: " + npcName + ". Known NPCs: " + engine.dropTables().keySet());
+            throw new IllegalArgumentException("Unknown NPC: " + npcName + ". Available NPCs (showing up to 10): " + sampleNpcNames(engine, 10));
         }
 
         System.out.print(buildSimulationReport(engine, npcName, kills));
@@ -169,6 +171,12 @@ public class DropTableDemo {
         return null;
     }
 
+    private static String sampleNpcNames(DropTableEngine engine, int maxCount) {
+        List<String> names = new ArrayList<>(engine.dropTables().keySet());
+        int end = Math.min(maxCount, names.size());
+        return String.join(", ", names.subList(0, end));
+    }
+
     private static boolean hasRequiredDataFiles(Path dir) {
         return Files.exists(dir.resolve("rates.yml"))
             && Files.exists(dir.resolve("item_definitions.yml"))
@@ -234,7 +242,7 @@ public class DropTableDemo {
             form.add(dropMultiplierField);
             form.add(new JLabel("Rare Drop Multiplier"));
             form.add(rareMultiplierField);
-            form.add(new JLabel("Gold (Coins) Multiplier"));
+            form.add(new JLabel("GP Multiplier"));
             form.add(gpMultiplierField);
             form.add(new JLabel("Script Repo"));
             form.add(scriptRepoField);
@@ -243,7 +251,7 @@ public class DropTableDemo {
             form.add(new JLabel("SDN Parameters (Optional)"));
             form.add(sdnParamsField);
 
-            JTextArea output = new JTextArea(22, 110);
+            JTextArea output = new JTextArea(GUI_TEXT_AREA_ROWS, GUI_TEXT_AREA_COLUMNS);
             output.setEditable(false);
 
             JButton runButton = new JButton("Run Simulation");
@@ -263,15 +271,14 @@ public class DropTableDemo {
                     String npc = String.valueOf(npcBox.getSelectedItem());
                     long kills = Long.parseLong(killsField.getText().trim());
                     String report = buildSimulationReport(runEngine, npc, kills);
-                    output.setText(
-                        "Git/SDN setup fields\n"
-                            + "Script Repo: " + scriptRepoField.getText().trim() + "\n"
-                            + "Script Module: " + scriptModuleField.getText().trim() + "\n"
-                            + "SDN Parameters: " + sdnParamsField.getText().trim() + "\n"
-                            + report
-                    );
+                    output.setText(buildGuiOutput(
+                        scriptRepoField.getText().trim(),
+                        scriptModuleField.getText().trim(),
+                        sdnParamsField.getText().trim(),
+                        report
+                    ));
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(frame, ex.getMessage(), "Simulation error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, ex.getMessage(), "Simulation Error", JOptionPane.ERROR_MESSAGE);
                 }
             });
 
@@ -302,6 +309,16 @@ public class DropTableDemo {
         BufferedImage image = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_ARGB);
         frame.paint(image.getGraphics());
         ImageIO.write(image, "png", outputPath.toFile());
+    }
+
+    private static String buildGuiOutput(String scriptRepo, String scriptModule, String sdnParameters, String simulationReport) {
+        StringBuilder out = new StringBuilder();
+        out.append("Git/SDN setup fields").append('\n')
+            .append("Script Repo: ").append(scriptRepo).append('\n')
+            .append("Script Module: ").append(scriptModule).append('\n')
+            .append("SDN Parameters: ").append(sdnParameters).append('\n')
+            .append(simulationReport);
+        return out.toString();
     }
 
     private static class CliOptions {

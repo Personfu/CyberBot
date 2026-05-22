@@ -23,6 +23,8 @@ To boost coin drops heavily (for example 100x up to 100000000x+), add:
 --gp-multiplier=100
 ```
 
+Note: very large multipliers can overflow integer quantities for extreme cases. Use practical values for normal testing.
+
 ## All-in-one GUI mode
 
 You can launch a local GUI with simulation controls plus SDN/git setup fields:
