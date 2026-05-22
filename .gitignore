@@ -26,6 +26,7 @@ hs_err_pid*
 #Idea Files
 *.idea
 *.xml
+!pom.xml
 *.iml
 
 #Git Files
