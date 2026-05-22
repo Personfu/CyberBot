@@ -1,6 +1,8 @@
 package com.cyberscape.rsps317;
 
 import com.cyberscape.rsps317.DropTableEngine.DropResult;
+import com.cyberscape.rsps317.model.DropEntry;
+import com.cyberscape.rsps317.model.DropTable;
 import com.cyberscape.rsps317.model.Item;
 import com.cyberscape.rsps317.model.Npc;
 import com.cyberscape.rsps317.model.Rates;
@@ -270,11 +272,15 @@ public class DropTableDemo {
                     DropTableEngine runEngine = new DropTableEngine(selectedDataDir, runRates);
                     String npc = String.valueOf(npcBox.getSelectedItem());
                     long kills = Long.parseLong(killsField.getText().trim());
-                    String report = buildSimulationReport(runEngine, npc, kills);
+                    String report = kills > 0
+                        ? buildSimulationReport(runEngine, npc, kills)
+                        : "Simulation skipped (Kills <= 0)." + System.lineSeparator() + System.lineSeparator();
                     output.setText(buildGuiOutput(
                         scriptRepoField.getText().trim(),
                         scriptModuleField.getText().trim(),
                         sdnParamsField.getText().trim(),
+                        runRates,
+                        buildItemsPerEnemyReport(runEngine),
                         report
                     ));
                 } catch (Exception ex) {
@@ -311,13 +317,68 @@ public class DropTableDemo {
         ImageIO.write(image, "png", outputPath.toFile());
     }
 
-    private static String buildGuiOutput(String scriptRepo, String scriptModule, String sdnParameters, String simulationReport) {
+    private static String buildGuiOutput(
+        String scriptRepo,
+        String scriptModule,
+        String sdnParameters,
+        Rates rates,
+        String itemsPerEnemyReport,
+        String simulationReport
+    ) {
         StringBuilder out = new StringBuilder();
-        out.append("Git/SDN setup fields").append('\n')
+        out.append("SDN submission setup").append('\n')
             .append("Script Repo: ").append(scriptRepo).append('\n')
             .append("Script Module: ").append(scriptModule).append('\n')
-            .append("SDN Parameters: ").append(sdnParameters).append('\n')
+            .append("SDN Parameters (Optional): ").append(sdnParameters).append('\n')
+            .append('\n')
+            .append("Drop Rate Changer").append('\n')
+            .append("Drop Rate Multiplier: ").append(rates.dropRateMultiplier).append('\n')
+            .append("Rare Drop Multiplier: ").append(rates.rareDropMultiplier).append('\n')
+            .append("GP Multiplier: ").append(rates.gpMultiplier).append('\n')
+            .append('\n')
+            .append(itemsPerEnemyReport)
             .append(simulationReport);
+        return out.toString();
+    }
+
+    private static String buildItemsPerEnemyReport(DropTableEngine engine) {
+        StringBuilder out = new StringBuilder();
+        out.append("Items per enemy (configured drop table, not simulated)").append('\n');
+        for (Map.Entry<String, DropTable> e : engine.dropTables().entrySet()) {
+            DropTable table = e.getValue();
+            out.append("NPC: ").append(e.getKey()).append('\n');
+            if (!table.always().isEmpty()) {
+                out.append("  Always drops:").append('\n');
+                for (DropEntry alwaysEntry : table.always()) {
+                    out.append("    - ")
+                        .append(alwaysEntry.itemName())
+                        .append(" x")
+                        .append(alwaysEntry.quantity())
+                        .append('\n');
+                }
+            }
+            if (!table.entries().isEmpty()) {
+                out.append("  Weighted drops (rolls=")
+                    .append(table.rolls())
+                    .append(", weighted_total=")
+                    .append(table.weightedTotal())
+                    .append("):")
+                    .append('\n');
+                for (DropEntry weightedEntry : table.entries()) {
+                    out.append("    - ")
+                        .append(weightedEntry.itemName())
+                        .append(" x")
+                        .append(weightedEntry.quantity())
+                        .append(", weight=")
+                        .append(weightedEntry.weight());
+                    if (weightedEntry.rare()) {
+                        out.append(", rare");
+                    }
+                    out.append('\n');
+                }
+            }
+            out.append('\n');
+        }
         return out.toString();
     }
 
