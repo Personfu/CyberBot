@@ -38,3 +38,5 @@ GUI includes:
 - Script Module
 - SDN Parameters (Optional)
 - Drop Rate / Rare Drop / Gold (Coins) multipliers
+- Items per enemy (configured drop tables, not simulated)
+- Optional simulation output (set Kills to `0` to skip simulation)
