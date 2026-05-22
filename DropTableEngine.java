@@ -36,11 +36,20 @@ public class DropTableEngine {
     private final Map<String, Long> dryStreaks = new HashMap<>();
 
     public DropTableEngine(Path dataDir) throws IOException {
+        this(dataDir, null);
+    }
+
+    public DropTableEngine(Path dataDir, Rates runtimeRatesOverride) throws IOException {
         Yaml yaml = new Yaml();
-        this.rates = loadRates(yaml, dataDir.resolve("rates.yml"));
+        Rates loadedRates = loadRates(yaml, dataDir.resolve("rates.yml"));
+        this.rates = runtimeRatesOverride != null ? runtimeRatesOverride : loadedRates;
         this.items = loadItems(yaml, dataDir.resolve("item_definitions.yml"));
         this.npcs = loadNpcs(yaml, dataDir.resolve("npc_definitions.yml"));
         this.dropTables = loadDropTables(yaml, dataDir.resolve("drop_tables.yml"));
+    }
+
+    public static Rates loadRatesFile(Path path) throws IOException {
+        return loadRates(new Yaml(), path);
     }
 
     public Rates rates() { return rates; }
@@ -188,7 +197,7 @@ public class DropTableEngine {
     }
 
     @SuppressWarnings("unchecked")
-    private Rates loadRates(Yaml yaml, Path path) throws IOException {
+    private static Rates loadRates(Yaml yaml, Path path) throws IOException {
         Map<String, Object> raw;
         try (var in = Files.newInputStream(path)) {
             raw = yaml.load(in);
