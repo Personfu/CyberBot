@@ -16,14 +16,14 @@
 [![OSRS](https://img.shields.io/badge/OldSchool-RuneScape-8B0000?style=for-the-badge&logo=runescape&logoColor=gold)](https://oldschool.runescape.com/)
 [![License](https://img.shields.io/badge/License-MIT-00ff88?style=for-the-badge)](LICENSE)
 [![Repo](https://img.shields.io/badge/GitHub-Personfu%2FCyberBot-161b22?style=for-the-badge&logo=github)](https://github.com/Personfu/CyberBot)
-[![Compiled](https://img.shields.io/badge/Build-Passing-00ff88?style=for-the-badge&logo=powershell)]()
+[![Build](https://img.shields.io/badge/Build-Passing-00ff88?style=for-the-badge&logo=powershell)](DreambotAllInOne/build.ps1)
 
 </div>
 
 ---
 
 > **Java — an outdated language?** Maybe. But did we absolutely *smoke* it with this project?  
-> **Undeniably.** Welcome to CyberBot: where 1990s bytecode meets 2025 cyber operations.
+> **Undeniably.** Welcome to CyberBot — where 1990s bytecode meets 2025 cyber operations.
 
 ---
 
@@ -43,6 +43,7 @@
   - [Build & Deploy](#build--deploy)
 - [Drop Table Simulator](#drop-table-simulator)
   - [Overview](#overview)
+  - [Simulator GUI](#simulator-gui)
   - [CLI Flags Reference](#cli-flags-reference)
   - [Simulator Flow](#simulator-flow)
   - [Example Runs](#example-runs)
@@ -152,11 +153,11 @@ Each loop iteration, `nextState()` evaluates tasks in **priority order**:
 flowchart TD
     A([onLoop]) --> B{running?}
     B -- No --> Z([sleep 300ms])
-    B -- Yes --> C{Inv full OR\nfood low?}
-    C -- Yes --> D[BankTask\nopen → deposit → withdraw]
-    C -- No --> E{Ground items\nwithin radius?}
-    E -- Yes --> F[LootTask\nwalk → pick up → track GP]
-    E -- No --> G[CombatTask\nfind NPC → attack → eat → count kills]
+    B -- Yes --> C{"Inv full OR\nfood low?"}
+    C -- Yes --> D["BankTask\nopen → deposit → withdraw"]
+    C -- No --> E{"Ground items\nwithin radius?"}
+    E -- Yes --> F["LootTask\nwalk → pick up → track GP"]
+    E -- No --> G["CombatTask\nfind NPC → attack → eat → count kills"]
     D --> A
     F --> A
     G --> A
@@ -167,29 +168,29 @@ flowchart TD
 ### Package Architecture
 
 ```mermaid
-graph LR
+flowchart LR
     subgraph Entry["nezz.dreambot.allinone"]
-        AIO[AllInOne.java\n@ScriptManifest]
+        AIO["AllInOne.java\n@ScriptManifest"]
     end
 
     subgraph Config["config/"]
-        SC[ScriptConfig]
-        LE[LootEntry]
-        NLP[NpcLootProfile\n18 drop tables]
+        SC["ScriptConfig"]
+        LE["LootEntry"]
+        NLP["NpcLootProfile\n18 drop tables"]
     end
 
     subgraph Tasks["tasks/"]
-        CT[CombatTask]
-        LT[LootTask]
-        BT[BankTask]
+        CT["CombatTask"]
+        LT["LootTask"]
+        BT["BankTask"]
     end
 
     subgraph GUI["gui/"]
-        G[AllInOneGui\n4-tab Swing GUI]
+        G["AllInOneGui\n4-tab Swing GUI"]
     end
 
     subgraph Util["util/"]
-        QF[QuantityFormatter]
+        QF["QuantityFormatter"]
     end
 
     AIO --> SC
@@ -281,25 +282,25 @@ Drop tables sourced from [OSRS Wiki](https://oldschool.runescape.wiki/) with rea
 All rates marked `~` are approximated from weighted tables.
 
 | NPC | Combat Lvl | Notable Drops | Rarest Drop |
-|-----|-----------|---------------|-------------|
-| [![Chicken](https://oldschool.runescape.wiki/images/Chicken.png)](https://oldschool.runescape.wiki/w/Chicken) **Chicken** | 1 | Bones, Raw chicken, Feathers | — |
-| [![Cow](https://oldschool.runescape.wiki/images/Cow.png)](https://oldschool.runescape.wiki/w/Cow) **Cow** | 2 | Cowhide, Raw beef | — |
-| [![Goblin](https://oldschool.runescape.wiki/images/Goblin_%28level_2%29.png)](https://oldschool.runescape.wiki/w/Goblin) **Goblin** | 2 | Bones, Coins | Gold bar `1/128` |
-| [![Hill Giant](https://oldschool.runescape.wiki/images/Hill_Giant.png)](https://oldschool.runescape.wiki/w/Hill_Giant) **Hill Giant** | 28 | Big bones, Limpwurt root | Giant key `1/128` |
-| [![Moss Giant](https://oldschool.runescape.wiki/images/Moss_giant.png)](https://oldschool.runescape.wiki/w/Moss_giant) **Moss Giant** | 42 | Big bones, Mossy key | Rune med helm `1/128` |
-| [![Lesser Demon](https://oldschool.runescape.wiki/images/Lesser_demon.png)](https://oldschool.runescape.wiki/w/Lesser_demon) **Lesser Demon** | 82 | Ashes, Rune med helm | Rune full helm `1/128` |
-| [![Greater Demon](https://oldschool.runescape.wiki/images/Greater_demon.png)](https://oldschool.runescape.wiki/w/Greater_demon) **Greater Demon** | 92 | Ashes, Rune chainbody | Rune sq shield `1/128` |
-| [![Black Demon](https://oldschool.runescape.wiki/images/Black_demon.png)](https://oldschool.runescape.wiki/w/Black_demon) **Black Demon** | 172 | Ashes, Rune battleaxe | Rune 2h sword `1/128` |
-| [![Abyssal Demon](https://oldschool.runescape.wiki/images/Abyssal_demon.png)](https://oldschool.runescape.wiki/w/Abyssal_demon) **Abyssal Demon** | 124 | Ashes, Ensouled head | **Abyssal whip** `1/512` |
-| [![Gargoyle](https://oldschool.runescape.wiki/images/Gargoyle.png)](https://oldschool.runescape.wiki/w/Gargoyle) **Gargoyle** | 111 | Granite maul, Gold bar | **Granite maul** `1/256` |
-| [![Dagannoth Rex](https://oldschool.runescape.wiki/images/Dagannoth_Rex.png)](https://oldschool.runescape.wiki/w/Dagannoth_Rex) **Dagannoth Rex** | 303 | Dagannoth bones | **Berserker ring** `1/128` |
-| [![Dagannoth Supreme](https://oldschool.runescape.wiki/images/Dagannoth_Supreme.png)](https://oldschool.runescape.wiki/w/Dagannoth_Supreme) **Dagannoth Supreme** | 303 | Dagannoth bones | **Archers' ring** `1/128` |
-| [![Dagannoth Prime](https://oldschool.runescape.wiki/images/Dagannoth_Prime.png)](https://oldschool.runescape.wiki/w/Dagannoth_Prime) **Dagannoth Prime** | 303 | Dagannoth bones | **Seers' ring** `1/128` |
-| [![General Graardor](https://oldschool.runescape.wiki/images/General_Graardor.png)](https://oldschool.runescape.wiki/w/General_Graardor) **General Graardor** | 624 | Ourg bones, Rune items | **Bandos chestplate** `1/384` |
-| [![Cerberus](https://oldschool.runescape.wiki/images/Cerberus.png)](https://oldschool.runescape.wiki/w/Cerberus) **Cerberus** | 318 | Ashes, Smouldering stone | **Primordial crystal** `1/512` |
-| [![King Black Dragon](https://oldschool.runescape.wiki/images/King_Black_Dragon.png)](https://oldschool.runescape.wiki/w/King_Black_Dragon) **King Black Dragon** | 276 | Dragon bones, Black dragonhide | **KBD heads** `1/128` |
-| [![Vorkath](https://oldschool.runescape.wiki/images/Vorkath.png)](https://oldschool.runescape.wiki/w/Vorkath) **Vorkath** | 732 | Dagannoth bones, Dragonhide | **Draconic visage** `1/5000` |
-| [![Zulrah](https://oldschool.runescape.wiki/images/Zulrah.png)](https://oldschool.runescape.wiki/w/Zulrah) **Zulrah** | 725 | Zulrah's scales | **Tanzanite fang** `1/512` |
+|-----|:---------:|---------------|-------------|
+| [**Chicken**](https://oldschool.runescape.wiki/w/Chicken) | 1 | Bones, Raw chicken, Feathers | — |
+| [**Cow**](https://oldschool.runescape.wiki/w/Cow) | 2 | Cowhide, Raw beef | — |
+| [**Goblin**](https://oldschool.runescape.wiki/w/Goblin) | 2 | Bones, Coins | Gold bar `1/128` |
+| [**Hill Giant**](https://oldschool.runescape.wiki/w/Hill_Giant) | 28 | Big bones, Limpwurt root | Giant key `1/128` |
+| [**Moss Giant**](https://oldschool.runescape.wiki/w/Moss_giant) | 42 | Big bones, Mossy key | Rune med helm `1/128` |
+| [**Lesser Demon**](https://oldschool.runescape.wiki/w/Lesser_demon) | 82 | Ashes, Rune med helm | Rune full helm `1/128` |
+| [**Greater Demon**](https://oldschool.runescape.wiki/w/Greater_demon) | 92 | Ashes, Rune chainbody | Rune sq shield `1/128` |
+| [**Black Demon**](https://oldschool.runescape.wiki/w/Black_demon) | 172 | Ashes, Rune battleaxe | Rune 2h sword `1/128` |
+| [**Abyssal Demon**](https://oldschool.runescape.wiki/w/Abyssal_demon) | 124 | Ashes, Ensouled head | **Abyssal whip** `1/512` |
+| [**Gargoyle**](https://oldschool.runescape.wiki/w/Gargoyle) | 111 | Granite maul, Gold bar | **Granite maul** `1/256` |
+| [**Dagannoth Rex**](https://oldschool.runescape.wiki/w/Dagannoth_Rex) | 303 | Dagannoth bones | **Berserker ring** `1/128` |
+| [**Dagannoth Supreme**](https://oldschool.runescape.wiki/w/Dagannoth_Supreme) | 303 | Dagannoth bones | **Archers' ring** `1/128` |
+| [**Dagannoth Prime**](https://oldschool.runescape.wiki/w/Dagannoth_Prime) | 303 | Dagannoth bones | **Seers' ring** `1/128` |
+| [**General Graardor**](https://oldschool.runescape.wiki/w/General_Graardor) | 624 | Ourg bones, Rune items | **Bandos chestplate** `1/384` |
+| [**Cerberus**](https://oldschool.runescape.wiki/w/Cerberus) | 318 | Ashes, Smouldering stone | **Primordial crystal** `1/512` |
+| [**King Black Dragon**](https://oldschool.runescape.wiki/w/King_Black_Dragon) | 276 | Dragon bones, Black dragonhide | **KBD heads** `1/128` |
+| [**Vorkath**](https://oldschool.runescape.wiki/w/Vorkath) | 732 | Dagannoth bones, Dragonhide | **Draconic visage** `1/5000` |
+| [**Zulrah**](https://oldschool.runescape.wiki/w/Zulrah) | 725 | Zulrah's scales | **Tanzanite fang** `1/512` |
 
 ---
 
@@ -376,14 +377,14 @@ powershell -ExecutionPolicy Bypass -File "C:\Users\pfuru\CyberBot\DreambotAllInO
 
 ```mermaid
 flowchart LR
-    A[Validate\njavac / jar / dreambot-client.jar] --> B[Clean\nout/classes/]
-    B --> C[Collect\n9 .java files]
-    C --> D[javac\n--release 11\n-cp dreambot-client.jar]
+    A["Validate\njavac / jar / dreambot-client.jar"] --> B["Clean\nout/classes/"]
+    B --> C["Collect\n9 .java files"]
+    C --> D["javac\n--release 11\n-cp dreambot-client.jar"]
     D --> E{Errors?}
-    E -- Yes --> F[❌ Exit 1\nfix errors]
-    E -- No --> G[jar cf\nout/FLLCAllInOne.jar]
-    G --> H[Copy to\nDreamBot/Scripts/\nFLLCAllInOne.jar]
-    H --> I[✅ Done\nopen DreamBot → Scripts]
+    E -- Yes --> F["Exit 1\nfix errors above"]
+    E -- No --> G["jar cf\nout/FLLCAllInOne.jar"]
+    G --> H["Copy to\nDreamBot/Scripts/\nFLLCAllInOne.jar"]
+    H --> I["Done\nopen DreamBot → Scripts"]
 ```
 
 #### Load in DreamBot
@@ -410,6 +411,12 @@ npc_definitions.yml   ← NPC names, IDs, level, drop table reference
 rates.yml             ← default multiplier config (can be overridden via CLI)
 ```
 
+### Simulator GUI
+
+Launch with `--gui` to open the Swing interface — configure any NPC, tweak multipliers, and run simulations without touching the command line.
+
+![Drop Table Simulator GUI](assets/drop-table-gui.png)
+
 ### CLI Flags Reference
 
 ```
@@ -428,18 +435,18 @@ Usage: DropTableDemo [options] <NpcName> [kills]
 
 ```mermaid
 flowchart TD
-    A([Start: DropTableDemo.main]) --> B[Parse CLI args\nCliOptions]
-    B --> C[resolveDataDir\ndrop_tables.yml + npc_definitions.yml\n+ item_definitions.yml + rates.yml]
-    C --> D{--gui flag?}
-    D -- Yes --> E[Launch AllInOneGui\nSwing EDT]
-    D -- No --> F[Load NPC by name\nfrom npc_definitions.yml]
-    F --> G[Build DropTable\nfrom drop_tables.yml]
-    G --> H{kills == 0?}
-    H -- Yes --> I[Print drop table\nno simulation]
-    H -- No --> J[DropTableEngine.simulate\nn × RNG rolls]
-    J --> K[Accumulate results\nitem → total qty + times dropped]
-    K --> L[Sort by estimated GP value\ndescending]
-    L --> M[Print histogram\nto stdout]
+    A([Start: DropTableDemo.main]) --> B["Parse CLI args\nCliOptions"]
+    B --> C["resolveDataDir\ndrop_tables.yml + npc_definitions.yml\n+ item_definitions.yml + rates.yml"]
+    C --> D{"--gui flag?"}
+    D -- Yes --> E["Launch AllInOneGui\nSwing EDT"]
+    D -- No --> F["Load NPC by name\nfrom npc_definitions.yml"]
+    F --> G["Build DropTable\nfrom drop_tables.yml"]
+    G --> H{"kills == 0?"}
+    H -- Yes --> I["Print drop table\nno simulation"]
+    H -- No --> J["DropTableEngine.simulate\nn × RNG rolls"]
+    J --> K["Accumulate results\nitem → total qty + times dropped"]
+    K --> L["Sort by estimated GP value\ndescending"]
+    L --> M["Print histogram\nto stdout"]
     M --> N([Exit 0])
 ```
 
