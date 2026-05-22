@@ -16,3 +16,23 @@ To boost rare drops for a run, add:
 ```bat
 --rare-drop-multiplier=25
 ```
+
+To boost coin drops heavily (for example 100x up to 100000000x+), add:
+
+```bat
+--gp-multiplier=100
+```
+
+## All-in-one GUI mode
+
+You can launch a local GUI with simulation controls plus SDN/git setup fields:
+
+```bat
+java -cp C:\Downloads\cb-classes;C:\Downloads\snakeyaml-2.2.jar com.cyberscape.rsps317.DropTableDemo --gui --data-dir=C:\Downloads\CyberBot
+```
+
+GUI includes:
+- Script Repo
+- Script Module
+- SDN Parameters (Optional)
+- Drop Rate / Rare Drop / Gold (Coins) multipliers

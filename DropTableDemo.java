@@ -5,6 +5,22 @@ import com.cyberscape.rsps317.model.Item;
 import com.cyberscape.rsps317.model.Npc;
 import com.cyberscape.rsps317.model.Rates;
 
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,11 +54,16 @@ public class DropTableDemo {
             throw new IllegalArgumentException("Could not find data files. Use --data-dir=<path> with rates.yml, item_definitions.yml, npc_definitions.yml, and drop_tables.yml.");
         }
 
+        if (options.gui) {
+            launchGui(dataDir, options);
+            return;
+        }
+
         Rates baseRates = DropTableEngine.loadRatesFile(dataDir.resolve("rates.yml"));
         Rates runRates = new Rates(
             options.dropRateMultiplier != null ? options.dropRateMultiplier : baseRates.dropRateMultiplier,
             options.rareDropMultiplier != null ? options.rareDropMultiplier : baseRates.rareDropMultiplier,
-            baseRates.gpMultiplier,
+            options.gpMultiplier != null ? options.gpMultiplier : baseRates.gpMultiplier,
             baseRates.xpMultiplier,
             baseRates.pityEnabled,
             baseRates.pityThreshold
@@ -64,11 +85,14 @@ public class DropTableDemo {
         }
 
         if (!engine.dropTables().containsKey(npcName)) {
-            System.err.println("Unknown NPC: " + npcName);
-            System.err.println("Known NPCs: " + engine.dropTables().keySet());
-            System.exit(1);
+            throw new IllegalArgumentException("Unknown NPC: " + npcName + ". Known NPCs: " + engine.dropTables().keySet());
         }
 
+        System.out.print(buildSimulationReport(engine, npcName, kills));
+        System.out.println("Edit rates.yml or use CLI multipliers and re-run to see the effect.");
+    }
+
+    private static String buildSimulationReport(DropTableEngine engine, String npcName, long kills) {
         Npc npc = engine.npcs().get(npcName);
         Map<String, Long> histogram = new LinkedHashMap<>();
         Map<String, Long> totalQty = new LinkedHashMap<>();
@@ -89,15 +113,17 @@ public class DropTableDemo {
             if (item != null) totalGp += item.gePrice() * e.getValue();
         }
 
-        System.out.println();
-        System.out.println("=== Drop simulation: " + npcName + " x " + kills + " kills ===");
-        System.out.println("Rates: drop=" + engine.rates().dropRateMultiplier
-            + " rare=" + engine.rates().rareDropMultiplier
-            + " gp=" + engine.rates().gpMultiplier);
-        System.out.println("Engine time: " + elapsedMs + "ms");
-        System.out.println();
-        System.out.printf("%-30s %12s %12s %14s%n", "Item", "Drops", "Total qty", "Total GP");
-        System.out.println("-".repeat(72));
+        StringBuilder out = new StringBuilder();
+        out.append(System.lineSeparator());
+        out.append("=== Drop simulation: ").append(npcName).append(" x ").append(kills).append(" kills ===").append(System.lineSeparator());
+        out.append("Rates: drop=").append(engine.rates().dropRateMultiplier)
+            .append(" rare=").append(engine.rates().rareDropMultiplier)
+            .append(" gp=").append(engine.rates().gpMultiplier)
+            .append(System.lineSeparator());
+        out.append("Engine time: ").append(elapsedMs).append("ms").append(System.lineSeparator());
+        out.append(System.lineSeparator());
+        out.append(String.format("%-30s %12s %12s %14s%n", "Item", "Drops", "Total qty", "Total GP"));
+        out.append("-".repeat(72)).append(System.lineSeparator());
         histogram.entrySet().stream()
             .sorted((a, b) -> Long.compare(gpFor(engine, b.getKey(), totalQty),
                                            gpFor(engine, a.getKey(), totalQty)))
@@ -105,26 +131,25 @@ public class DropTableDemo {
                 long qty = totalQty.getOrDefault(e.getKey(), 0L);
                 Item it = engine.items().get(e.getKey());
                 long gp = it != null ? it.gePrice() * qty : 0;
-                System.out.printf("%-30s %12s %12s %14s%n",
+                out.append(String.format("%-30s %12s %12s %14s%n",
                     truncate(e.getKey(), 30),
                     formatN(e.getValue()),
                     formatN(qty),
-                    formatN(gp));
+                    formatN(gp)));
             });
-        System.out.println("-".repeat(72));
-        System.out.printf("%-30s %12s %12s %14s%n", "TOTAL", "", "", formatN(totalGp));
+        out.append("-".repeat(72)).append(System.lineSeparator());
+        out.append(String.format("%-30s %12s %12s %14s%n", "TOTAL", "", "", formatN(totalGp)));
 
         if (npc != null && npc.killTimeSeconds() > 0) {
             double killsPerHour = 3600.0 / npc.killTimeSeconds();
             double gpPerKill = (double) totalGp / kills;
             long projectedGpPerHour = (long) (killsPerHour * gpPerKill);
-            System.out.println();
-            System.out.println("Projected at " + (int) killsPerHour + " kills/hr: "
-                + formatN(projectedGpPerHour) + " gp/hr");
+            out.append(System.lineSeparator());
+            out.append("Projected at ").append((int) killsPerHour).append(" kills/hr: ")
+                .append(formatN(projectedGpPerHour)).append(" gp/hr").append(System.lineSeparator());
         }
-
-        System.out.println();
-        System.out.println("Edit data/rates.yml -> drop_rate_multiplier and re-run to see the effect.");
+        out.append(System.lineSeparator());
+        return out.toString();
     }
 
     private static Path resolveDataDir(String dataDirArg) {
@@ -156,10 +181,22 @@ public class DropTableDemo {
         for (String arg : args) {
             if (arg.startsWith("--data-dir=")) {
                 options.dataDirArg = arg.substring("--data-dir=".length());
+            } else if (arg.equals("--gui")) {
+                options.gui = true;
+            } else if (arg.startsWith("--gui-screenshot=")) {
+                options.guiScreenshot = arg.substring("--gui-screenshot=".length());
             } else if (arg.startsWith("--rare-drop-multiplier=")) {
                 options.rareDropMultiplier = Double.parseDouble(arg.substring("--rare-drop-multiplier=".length()));
             } else if (arg.startsWith("--drop-rate-multiplier=")) {
                 options.dropRateMultiplier = Double.parseDouble(arg.substring("--drop-rate-multiplier=".length()));
+            } else if (arg.startsWith("--gp-multiplier=")) {
+                options.gpMultiplier = Double.parseDouble(arg.substring("--gp-multiplier=".length()));
+            } else if (arg.startsWith("--script-repo=")) {
+                options.scriptRepo = arg.substring("--script-repo=".length());
+            } else if (arg.startsWith("--script-module=")) {
+                options.scriptModule = arg.substring("--script-module=".length());
+            } else if (arg.startsWith("--sdn-parameters=")) {
+                options.sdnParameters = arg.substring("--sdn-parameters=".length());
             } else {
                 options.positional.add(arg);
             }
@@ -167,10 +204,116 @@ public class DropTableDemo {
         return options;
     }
 
+    private static void launchGui(Path dataDir, CliOptions options) throws Exception {
+        Rates baseRates = DropTableEngine.loadRatesFile(dataDir.resolve("rates.yml"));
+        DropTableEngine baseEngine = new DropTableEngine(dataDir, baseRates);
+
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("CyberBot All-in-One Drop Config");
+            frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+            JPanel form = new JPanel(new GridLayout(0, 2, 8, 8));
+
+            JTextField dataDirField = new JTextField(dataDir.toString());
+            JComboBox<String> npcBox = new JComboBox<>(baseEngine.dropTables().keySet().toArray(String[]::new));
+            JTextField killsField = new JTextField("1000");
+            JTextField dropMultiplierField = new JTextField(String.valueOf(options.dropRateMultiplier != null ? options.dropRateMultiplier : baseRates.dropRateMultiplier));
+            JTextField rareMultiplierField = new JTextField(String.valueOf(options.rareDropMultiplier != null ? options.rareDropMultiplier : baseRates.rareDropMultiplier));
+            JTextField gpMultiplierField = new JTextField(String.valueOf(options.gpMultiplier != null ? options.gpMultiplier : baseRates.gpMultiplier));
+            JTextField scriptRepoField = new JTextField(options.scriptRepo != null ? options.scriptRepo : "");
+            JTextField scriptModuleField = new JTextField(options.scriptModule != null ? options.scriptModule : "");
+            JTextField sdnParamsField = new JTextField(options.sdnParameters != null ? options.sdnParameters : "");
+
+            form.add(new JLabel("Data Directory"));
+            form.add(dataDirField);
+            form.add(new JLabel("NPC"));
+            form.add(npcBox);
+            form.add(new JLabel("Kills"));
+            form.add(killsField);
+            form.add(new JLabel("Drop Rate Multiplier"));
+            form.add(dropMultiplierField);
+            form.add(new JLabel("Rare Drop Multiplier"));
+            form.add(rareMultiplierField);
+            form.add(new JLabel("Gold (Coins) Multiplier"));
+            form.add(gpMultiplierField);
+            form.add(new JLabel("Script Repo"));
+            form.add(scriptRepoField);
+            form.add(new JLabel("Script Module"));
+            form.add(scriptModuleField);
+            form.add(new JLabel("SDN Parameters (Optional)"));
+            form.add(sdnParamsField);
+
+            JTextArea output = new JTextArea(22, 110);
+            output.setEditable(false);
+
+            JButton runButton = new JButton("Run Simulation");
+            runButton.addActionListener(ev -> {
+                try {
+                    Path selectedDataDir = Paths.get(dataDirField.getText().trim()).toAbsolutePath().normalize();
+                    Rates selectedBase = DropTableEngine.loadRatesFile(selectedDataDir.resolve("rates.yml"));
+                    Rates runRates = new Rates(
+                        Double.parseDouble(dropMultiplierField.getText().trim()),
+                        Double.parseDouble(rareMultiplierField.getText().trim()),
+                        Double.parseDouble(gpMultiplierField.getText().trim()),
+                        selectedBase.xpMultiplier,
+                        selectedBase.pityEnabled,
+                        selectedBase.pityThreshold
+                    );
+                    DropTableEngine runEngine = new DropTableEngine(selectedDataDir, runRates);
+                    String npc = String.valueOf(npcBox.getSelectedItem());
+                    long kills = Long.parseLong(killsField.getText().trim());
+                    String report = buildSimulationReport(runEngine, npc, kills);
+                    output.setText(
+                        "Git/SDN setup fields\n"
+                            + "Script Repo: " + scriptRepoField.getText().trim() + "\n"
+                            + "Script Module: " + scriptModuleField.getText().trim() + "\n"
+                            + "SDN Parameters: " + sdnParamsField.getText().trim() + "\n"
+                            + report
+                    );
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(frame, ex.getMessage(), "Simulation error", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+
+            frame.getContentPane().setLayout(new BorderLayout(8, 8));
+            frame.add(form, BorderLayout.NORTH);
+            frame.add(runButton, BorderLayout.CENTER);
+            frame.add(new JScrollPane(output), BorderLayout.SOUTH);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+
+            if (options.guiScreenshot != null && !options.guiScreenshot.isBlank()) {
+                try {
+                    saveComponentScreenshot(frame, Paths.get(options.guiScreenshot).toAbsolutePath().normalize());
+                    frame.dispose();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+    }
+
+    private static void saveComponentScreenshot(JFrame frame, Path outputPath) throws IOException {
+        Path parent = outputPath.getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        BufferedImage image = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        frame.paint(image.getGraphics());
+        ImageIO.write(image, "png", outputPath.toFile());
+    }
+
     private static class CliOptions {
         private String dataDirArg;
+        private boolean gui;
+        private String guiScreenshot;
         private Double rareDropMultiplier;
         private Double dropRateMultiplier;
+        private Double gpMultiplier;
+        private String scriptRepo;
+        private String scriptModule;
+        private String sdnParameters;
         private final List<String> positional = new ArrayList<>();
     }
 
