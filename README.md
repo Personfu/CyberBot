@@ -9,6 +9,7 @@ From the repository root:
 ```bash
 mvn -q -DskipTests package
 java -jar target/Launcer.exe Vorkath 10000
+java -jar target/Launcher.exe Vorkath 10000
 ```
 
 ### Rare drop rate changer
@@ -17,6 +18,7 @@ You can raise rare drop chance locally by overriding `rare_drop_multiplier` at l
 
 ```bash
 java -Drare_drop_multiplier=10 -jar target/Launcer.exe Vorkath 10000
+java -Drare_drop_multiplier=10 -jar target/Launcher.exe Vorkath 10000
 ```
 
 Other optional overrides:

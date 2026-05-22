@@ -22,7 +22,7 @@
 
     <build>
         <sourceDirectory>${project.basedir}</sourceDirectory>
-        <finalName>Launcer</finalName>
+        <finalName>Launcher</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -69,7 +69,9 @@
                         <phase>package</phase>
                         <configuration>
                             <target>
-                                <copy file="${project.build.directory}/Launcer.jar"
+                                <copy file="${project.build.directory}/Launcher.jar"
+                                      tofile="${project.build.directory}/Launcher.exe"/>
+                                <copy file="${project.build.directory}/Launcher.jar"
                                       tofile="${project.build.directory}/Launcer.exe"/>
                             </target>
                         </configuration>
