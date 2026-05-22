@@ -29,8 +29,13 @@ public class DropTableDemo {
 
     public static void main(String[] args) throws Exception {
         Path dataDir = Paths.get("data").toAbsolutePath();
-        if (!dataDir.toFile().exists()) {
-            dataDir = Paths.get(System.getProperty("user.dir"), "Cyberscape317", "data").toAbsolutePath();
+        if (!dataDir.resolve("rates.yml").toFile().exists()) {
+            Path currentDir = Paths.get(System.getProperty("user.dir")).toAbsolutePath();
+            if (currentDir.resolve("rates.yml").toFile().exists()) {
+                dataDir = currentDir;
+            } else {
+                dataDir = currentDir.resolve(Paths.get("Cyberscape317", "data")).toAbsolutePath();
+            }
         }
         DropTableEngine engine = new DropTableEngine(dataDir);
 
