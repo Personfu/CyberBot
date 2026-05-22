@@ -3,10 +3,13 @@ package com.cyberscape.rsps317;
 import com.cyberscape.rsps317.DropTableEngine.DropResult;
 import com.cyberscape.rsps317.model.Item;
 import com.cyberscape.rsps317.model.Npc;
+import com.cyberscape.rsps317.model.Rates;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -28,17 +31,30 @@ import java.util.Scanner;
 public class DropTableDemo {
 
     public static void main(String[] args) throws Exception {
-        Path dataDir = Paths.get("data").toAbsolutePath();
-        if (!dataDir.toFile().exists()) {
-            dataDir = Paths.get(System.getProperty("user.dir"), "Cyberscape317", "data").toAbsolutePath();
+        CliOptions options = parseArgs(args);
+
+        Path dataDir = resolveDataDir(options.dataDirArg);
+        if (dataDir == null) {
+            throw new IllegalArgumentException("Could not find data files. Use --data-dir=<path> with rates.yml, item_definitions.yml, npc_definitions.yml, and drop_tables.yml.");
         }
-        DropTableEngine engine = new DropTableEngine(dataDir);
+
+        DropTableEngine baseEngine = new DropTableEngine(dataDir);
+        Rates baseRates = baseEngine.rates();
+        Rates runRates = new Rates(
+            options.dropRateMultiplier != null ? options.dropRateMultiplier : baseRates.dropRateMultiplier,
+            options.rareDropMultiplier != null ? options.rareDropMultiplier : baseRates.rareDropMultiplier,
+            baseRates.gpMultiplier,
+            baseRates.xpMultiplier,
+            baseRates.pityEnabled,
+            baseRates.pityThreshold
+        );
+        DropTableEngine engine = new DropTableEngine(dataDir, runRates);
 
         String npcName;
         long kills;
-        if (args.length >= 2) {
-            npcName = args[0];
-            kills = Long.parseLong(args[1]);
+        if (options.positional.size() >= 2) {
+            npcName = options.positional.get(0);
+            kills = Long.parseLong(options.positional.get(1));
         } else {
             try (Scanner sc = new Scanner(System.in)) {
                 System.out.print("NPC name: ");
@@ -110,6 +126,53 @@ public class DropTableDemo {
 
         System.out.println();
         System.out.println("Edit data/rates.yml -> drop_rate_multiplier and re-run to see the effect.");
+    }
+
+    private static Path resolveDataDir(String dataDirArg) {
+        List<Path> candidates = new ArrayList<>();
+        if (dataDirArg != null && !dataDirArg.isBlank()) {
+            candidates.add(Paths.get(dataDirArg).toAbsolutePath().normalize());
+        }
+        candidates.add(Paths.get("data").toAbsolutePath().normalize());
+        candidates.add(Paths.get(System.getProperty("user.dir")).toAbsolutePath().normalize());
+        candidates.add(Paths.get(System.getProperty("user.dir"), "Cyberscape317", "data").toAbsolutePath().normalize());
+
+        for (Path candidate : candidates) {
+            if (hasRequiredDataFiles(candidate)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    private static boolean hasRequiredDataFiles(Path dir) {
+        return Files.exists(dir.resolve("rates.yml"))
+            && Files.exists(dir.resolve("item_definitions.yml"))
+            && Files.exists(dir.resolve("npc_definitions.yml"))
+            && Files.exists(dir.resolve("drop_tables.yml"));
+    }
+
+    private static CliOptions parseArgs(String[] args) {
+        CliOptions options = new CliOptions();
+        for (String arg : args) {
+            if (arg.startsWith("--data-dir=")) {
+                options.dataDirArg = arg.substring("--data-dir=".length());
+            } else if (arg.startsWith("--rare-drop-multiplier=")) {
+                options.rareDropMultiplier = Double.parseDouble(arg.substring("--rare-drop-multiplier=".length()));
+            } else if (arg.startsWith("--drop-rate-multiplier=")) {
+                options.dropRateMultiplier = Double.parseDouble(arg.substring("--drop-rate-multiplier=".length()));
+            } else {
+                options.positional.add(arg);
+            }
+        }
+        return options;
+    }
+
+    private static class CliOptions {
+        private String dataDirArg;
+        private Double rareDropMultiplier;
+        private Double dropRateMultiplier;
+        private final List<String> positional = new ArrayList<>();
     }
 
     private static long gpFor(DropTableEngine engine, String name, Map<String, Long> totals) {
