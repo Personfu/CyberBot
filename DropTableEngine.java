@@ -48,6 +48,10 @@ public class DropTableEngine {
         this.dropTables = loadDropTables(yaml, dataDir.resolve("drop_tables.yml"));
     }
 
+    public static Rates loadRatesFile(Path path) throws IOException {
+        return loadRates(new Yaml(), path);
+    }
+
     public Rates rates() { return rates; }
     public Map<String, Item> items() { return items; }
     public Map<String, Npc> npcs() { return npcs; }
@@ -193,7 +197,7 @@ public class DropTableEngine {
     }
 
     @SuppressWarnings("unchecked")
-    private Rates loadRates(Yaml yaml, Path path) throws IOException {
+    private static Rates loadRates(Yaml yaml, Path path) throws IOException {
         Map<String, Object> raw;
         try (var in = Files.newInputStream(path)) {
             raw = yaml.load(in);

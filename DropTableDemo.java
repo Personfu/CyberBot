@@ -38,8 +38,7 @@ public class DropTableDemo {
             throw new IllegalArgumentException("Could not find data files. Use --data-dir=<path> with rates.yml, item_definitions.yml, npc_definitions.yml, and drop_tables.yml.");
         }
 
-        DropTableEngine baseEngine = new DropTableEngine(dataDir);
-        Rates baseRates = baseEngine.rates();
+        Rates baseRates = DropTableEngine.loadRatesFile(dataDir.resolve("rates.yml"));
         Rates runRates = new Rates(
             options.dropRateMultiplier != null ? options.dropRateMultiplier : baseRates.dropRateMultiplier,
             options.rareDropMultiplier != null ? options.rareDropMultiplier : baseRates.rareDropMultiplier,
