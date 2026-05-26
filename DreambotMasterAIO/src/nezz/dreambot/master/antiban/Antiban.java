@@ -21,6 +21,7 @@ import org.dreambot.api.wrappers.interactive.GameObject;
 import org.dreambot.api.wrappers.interactive.NPC;
 
 import java.awt.*;
+import java.util.Random;
 
 /**
  * Humanisation layer — fires realistic idle events between bot actions.
@@ -50,6 +51,19 @@ public final class Antiban {
     private final Profile      profile;
     private final Logger       log;
     private final FatigueModel fatigue;
+    /**
+     * Per-account seeded RNG — all behavioral variation for this account
+     * (reaction speed, AFK tendency, mouse bias) is derived from this one
+     * seed so the same username always produces the same bot personality.
+     */
+    private final Random rng;
+    /** Mouse movement speed multiplier for this account (0.7–1.4). */
+    private final double mouseSpeedBias;
+    /** Reaction time multiplier — scales all event interval delays (0.75–1.35). */
+    private final double reactionBias;
+    /** AFK duration multiplier — how idle-prone this account is (0.6–1.6). */
+    private final double afkTendency;
+
     private long lastEvent = System.currentTimeMillis();
 
     // Separate timing for each category so they don't block each other
@@ -62,6 +76,14 @@ public final class Antiban {
         this.profile = profile;
         this.log = log;
         this.fatigue = new FatigueModel();
+        // Seed per-account RNG from username hash — same account = same personality
+        this.rng = new Random(profile.accountSeed());
+        // Derive stable behavioral biases in [min,max] using the seeded RNG
+        this.mouseSpeedBias = 0.70 + rng.nextDouble() * 0.70; // 0.70 – 1.40
+        this.reactionBias   = 0.75 + rng.nextDouble() * 0.60; // 0.75 – 1.35
+        this.afkTendency    = 0.60 + rng.nextDouble() * 1.00; // 0.60 – 1.60
+        log.info(String.format("Antiban seeds: mouse=%.2f reaction=%.2f afk=%.2f",
+                mouseSpeedBias, reactionBias, afkTendency));
         scheduleAll();
     }
 
@@ -75,10 +97,11 @@ public final class Antiban {
 
     private void scheduleAll() {
         long now = System.currentTimeMillis();
-        nextCameraEvent = now + Calculations.random(12_000, 35_000);
-        nextTabEvent    = now + Calculations.random(25_000, 75_000);
-        nextHoverEvent  = now + Calculations.random(18_000, 55_000);
-        nextAfkEvent    = now + Calculations.random(30_000, 90_000);
+        // Apply reactionBias so naturally fast/slow accounts have different cadence
+        nextCameraEvent = now + (long)(Calculations.random(12_000, 35_000) * reactionBias);
+        nextTabEvent    = now + (long)(Calculations.random(25_000, 75_000) * reactionBias);
+        nextHoverEvent  = now + (long)(Calculations.random(18_000, 55_000) * reactionBias);
+        nextAfkEvent    = now + (long)(Calculations.random(30_000, 90_000) * afkTendency);
     }
 
     // ── inner event task ─────────────────────────────────────────────────────
@@ -100,19 +123,19 @@ public final class Antiban {
             try {
                 if (profile.cameraJitter && now >= nextCameraEvent) {
                     doCameraEvent();
-                    nextCameraEvent = now + fatigue.fatigueDelay(Calculations.random(14_000, 40_000));
+                    nextCameraEvent = now + (long)(fatigue.fatigueDelay(Calculations.random(14_000, 40_000)) * reactionBias);
                 }
                 if (profile.randomTabs && now >= nextTabEvent) {
                     doTabEvent();
-                    nextTabEvent = now + fatigue.fatigueDelay(Calculations.random(30_000, 90_000));
+                    nextTabEvent = now + (long)(fatigue.fatigueDelay(Calculations.random(30_000, 90_000)) * reactionBias);
                 }
                 if (now >= nextHoverEvent) {
                     doHoverEvent();
-                    nextHoverEvent = now + fatigue.fatigueDelay(Calculations.random(20_000, 60_000));
+                    nextHoverEvent = now + (long)(fatigue.fatigueDelay(Calculations.random(20_000, 60_000)) * reactionBias);
                 }
                 if (profile.afkDrift && now >= nextAfkEvent) {
                     doAfkEvent();
-                    nextAfkEvent = now + fatigue.fatigueDelay(Calculations.random(35_000, 120_000));
+                    nextAfkEvent = now + (long)(fatigue.fatigueDelay(Calculations.random(35_000, 120_000)) * afkTendency);
                 }
             } catch (Throwable t) {
                 log.warn("antiban event errored: " + t);
@@ -221,7 +244,7 @@ public final class Antiban {
                 log.trace("antiban: hover npc=" + npc.getName());
                 sleepNoExc(Calculations.random(300, 900));
                 // Occasionally right-click → examine
-                if (Math.random() < 0.25) {
+                if (rng.nextDouble() < 0.25) {
                     Mouse.click(false); // right-click
                     sleepNoExc(Calculations.random(400, 700));
                     // Press Esc to dismiss without selecting
@@ -276,6 +299,10 @@ public final class Antiban {
         } else {
             ms = fatigue.fatigueDelay(Calculations.random(18_000, 45_000));
         }
+        // Scale AFK duration by this account's idleness tendency
+        ms = (int)(ms * afkTendency);
+        // Scale AFK duration by this account's idleness tendency
+        ms = (int)(ms * afkTendency);
         log.trace("antiban: afk " + (ms / 1000) + "s");
         sleepNoExc(ms);
     }
