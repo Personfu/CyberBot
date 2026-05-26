@@ -25,7 +25,20 @@ public final class MoneyRouteRegistry {
 
     public static void register(MoneyRoute r) { ROUTES.put(r.id(), r); }
 
-    public static MoneyRoute byId(String id) { return ROUTES.get(id); }
+    /** Exact match first; then case-insensitive; then simple class-name prefix (e.g. "ChickenRoute" → "chicken"). */
+    public static MoneyRoute byId(String id) {
+        if (id == null) return null;
+        MoneyRoute exact = ROUTES.get(id);
+        if (exact != null) return exact;
+        // Case-insensitive fallback
+        String lower = id.toLowerCase();
+        for (Map.Entry<String, MoneyRoute> e : ROUTES.entrySet()) {
+            if (e.getKey().equalsIgnoreCase(id)) return e.getValue();
+            // Class-name prefix: "ChickenRoute" → starts with "chicken" (id)
+            if (lower.startsWith(e.getKey().toLowerCase())) return e.getValue();
+        }
+        return null;
+    }
 
     public static List<MoneyRoute> all() { return new ArrayList<>(ROUTES.values()); }
 }

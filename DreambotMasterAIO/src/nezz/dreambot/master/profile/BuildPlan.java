@@ -84,8 +84,8 @@ public final class BuildPlan {
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Cooking",      15));
 
         // PHASE 3: Basic money making -> 25k gp
-        p.add(new Phase(PhaseType.MONEY_MAKING, "ChickenRoute",  0).opt("gpTarget", 15_000));
-        p.add(new Phase(PhaseType.MONEY_MAKING, "CowhideRoute",  0).opt("gpTarget", 25_000));
+        p.add(new Phase(PhaseType.MONEY_MAKING, "chicken",    0).opt("gpTarget", 15_000));
+        p.add(new Phase(PhaseType.MONEY_MAKING, "cowhide",    0).opt("gpTarget", 25_000));
 
         // PHASE 4: More starter quests (+17 QP -> 25 QP total)
         p.add(new Phase(PhaseType.QUEST, "Ernest the Chicken", 0));
@@ -113,8 +113,8 @@ public final class BuildPlan {
         p.add(new Phase(PhaseType.QUEST, "The Corsair Curse",  0));
 
         // PHASE 7: Early money making
-        p.add(new Phase(PhaseType.MONEY_MAKING, "CowhideRoute",  0).opt("gpTarget", 100_000));
-        p.add(new Phase(PhaseType.MONEY_MAKING, "FlaxSpinRoute", 0).opt("gpTarget", 100_000));
+        p.add(new Phase(PhaseType.MONEY_MAKING, "cowhide",    0).opt("gpTarget", 100_000));
+        p.add(new Phase(PhaseType.MONEY_MAKING, "flax_spin",  0).opt("gpTarget", 100_000));
 
         // PHASE 8: Combat for quests
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Brutus",       40));
@@ -133,8 +133,8 @@ public final class BuildPlan {
         p.add(new Phase(PhaseType.QUEST, "Dragon Slayer I", 0));
 
         // PHASE 11: Post-quest money making
-        p.add(new Phase(PhaseType.MONEY_MAKING, "FlaxSpinRoute", 0).opt("gpTarget", 300_000));
-        p.add(new Phase(PhaseType.MONEY_MAKING, "CowhideRoute",  0).opt("gpTarget", 200_000));
+        p.add(new Phase(PhaseType.MONEY_MAKING, "flax_spin",  0).opt("gpTarget", 300_000));
+        p.add(new Phase(PhaseType.MONEY_MAKING, "cowhide",    0).opt("gpTarget", 200_000));
 
         // PHASE 12: Brutus main grind
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Brutus",    70));
@@ -156,7 +156,7 @@ public final class BuildPlan {
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Runecrafting", 44));
 
         // PHASE 14: Advanced money making
-        p.add(new Phase(PhaseType.MONEY_MAKING, "SteelBarRoute", 0).opt("gpTarget", 500_000));
+        p.add(new Phase(PhaseType.MONEY_MAKING, "steel_bars", 0).opt("gpTarget", 500_000));
 
         // PHASE 15: Max skills
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Mining",       99));
