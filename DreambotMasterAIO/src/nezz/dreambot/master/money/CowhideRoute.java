@@ -127,8 +127,9 @@ public final class CowhideRoute extends MoneyRoute {
             Sleep.sleepUntil(Bank::isOpen, 3000);
         }
         if (Bank.isOpen()) {
-            Bank.depositAllItems();
+            // Count BEFORE depositing — depositAllItems empties the inventory
             bankedHides += Inventory.count(COWHIDE);
+            Bank.depositAllItems();
             Sleep.sleepUntil(() -> !Inventory.contains(COWHIDE), 1500);
             Bank.close();
             // Check if we have enough to sell

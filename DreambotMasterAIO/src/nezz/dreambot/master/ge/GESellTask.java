@@ -27,7 +27,6 @@ public final class GESellTask extends Task {
     private static final int MIN_STACK = 20; // don't bother unless we have ≥N of an item
 
     private final Logger log;
-    private boolean done = false;
 
     public GESellTask(Logger log) { this.log = log; }
 
@@ -46,7 +45,8 @@ public final class GESellTask extends Task {
 
     @Override public int  priority()  { return 60; }
     @Override public BotState state() { return BotState.MONEY_MAKING; }
-    @Override public boolean isComplete() { return done; }
+    /** Never complete — stays in scheduler permanently; isReady() gates execution. */
+    @Override public boolean isComplete() { return false; }
 
     @Override public boolean isReady() {
         // Ready when queue has something big enough to bother with
@@ -85,7 +85,6 @@ public final class GESellTask extends Task {
             }
         }
 
-        done = true;
         return Calculations.random(600, 1000);
     }
 

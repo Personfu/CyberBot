@@ -1,6 +1,7 @@
 package nezz.dreambot.master.money;
 
 import nezz.dreambot.master.ge.GESellTask;
+import nezz.dreambot.master.ge.GrandExchangeUtil;
 import nezz.dreambot.master.ge.PriceCache;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.container.impl.Inventory;
@@ -64,13 +65,16 @@ public final class SoftClayRoute extends MoneyRoute {
      */
     private static final int SELL_BATCH = 200;
 
+    /** Buy this many bucket of water at once when bank runs dry (~2 gp each). */
+    private static final int BUCKET_WATER_RESTOCK = 500;
+
     /** Per trip: mine this many clay + use this many buckets of water. */
     private static final int PER_TRIP   = 14;
 
     private int bankedSoftClay = 0;
     private State state = State.BANKING;   // start at bank to get water buckets
 
-    private enum State { BANKING, MINING, SOFTENING, SELLING }
+    private enum State { BANKING, MINING, SOFTENING, SELLING, BUYING_WATER }
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -84,11 +88,12 @@ public final class SoftClayRoute extends MoneyRoute {
 
     @Override public int tick() {
         switch (state) {
-            case BANKING:   return doBank();
-            case MINING:    return doMine();
-            case SOFTENING: return doSoften();
-            case SELLING:   return doSell();
-            default:        return 600;
+            case BANKING:      return doBank();
+            case MINING:       return doMine();
+            case SOFTENING:    return doSoften();
+            case SELLING:      return doSell();
+            case BUYING_WATER: return doBuyWater();
+            default:           return 600;
         }
     }
 
@@ -119,14 +124,17 @@ public final class SoftClayRoute extends MoneyRoute {
             Bank.depositAll("Clay");
             Sleep.sleepUntil(() -> !Inventory.contains("Clay"), 2000L);
         }
+        // Deposit empty buckets — using bucket on clay consumes the water and returns an empty bucket
+        if (Inventory.contains("Bucket")) {
+            Bank.depositAll("Bucket");
+            Sleep.sleepUntil(() -> !Inventory.contains("Bucket"), 2000L);
+        }
 
-        // Make sure we have full buckets of water in bank; if only buckets, fill them
-        // (For simplicity we withdraw pre-filled buckets of water from bank stock)
+        // Check if we have pre-filled buckets of water; if not, buy more
         if (!Bank.contains("Bucket of water")) {
-            // Try filling empty buckets from a water source — for now just stop if none available
-            // A human would have pre-filled some; the route will pause gracefully
             Bank.close();
-            return Calculations.random(3000, 5000); // wait and retry next tick
+            state = State.BUYING_WATER;
+            return Calculations.random(300, 500);
         }
 
         // Withdraw exactly PER_TRIP buckets of water
@@ -237,5 +245,23 @@ public final class SoftClayRoute extends MoneyRoute {
         bankedSoftClay = 0;
         state = State.BANKING;
         return 300;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // BUYING_WATER — restock buckets of water from GE (costs ~2 gp each)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private int doBuyWater() {
+        // Buckets of water are ~1-3 gp each — negligible cost vs 250+ gp per soft clay.
+        // Cap at 25 gp/bucket to guard against any price spike.
+        boolean bought = GrandExchangeUtil.buyChecked(
+                ITEM_BUCKET_WATER, "Bucket of water", BUCKET_WATER_RESTOCK, 25);
+        if (bought) {
+            // Collect any finished offer and bank the buckets
+            GrandExchangeUtil.collectAndBank();
+        }
+        // Back to bank regardless — will retry if offer not yet filled
+        state = State.BANKING;
+        return Calculations.random(2000, 4000);
     }
 }

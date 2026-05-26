@@ -3,6 +3,7 @@ package nezz.dreambot.master.core;
 import nezz.dreambot.master.antiban.Antiban;
 import nezz.dreambot.master.antiban.BreakManager;
 import nezz.dreambot.master.antiban.HumanMouse;
+import nezz.dreambot.master.ge.GESellTask;
 import nezz.dreambot.master.gui.MasterGui;
 import nezz.dreambot.master.profile.BuildPlan;
 import nezz.dreambot.master.profile.Profile;
@@ -94,6 +95,7 @@ public class MasterAIO extends AbstractScript {
         HumanMouse.install(profile);
         SkillTracker.start();
         scheduler.add(new BuildPlanTask(profile, scheduler, log));
+        scheduler.add(new GESellTask(log));   // permanent sell-queue processor
         antiban.register(scheduler);
         breaks.register(scheduler);
         log.info("MasterAIO started — plan: " + profile.plan.phases().size() + " phases");
