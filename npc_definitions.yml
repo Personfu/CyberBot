@@ -3,6 +3,8 @@
 
 "Chicken":           {id:   41, combat_level:   1, hitpoints:    3, kill_time_seconds: 2}
 "Cow":               {id:   81, combat_level:   2, hitpoints:    8, kill_time_seconds: 3}
+"Brutus":            {id: 9001, combat_level:  30, hitpoints:   80, kill_time_seconds: 8}
+"Hill Giant":        {id: 2099, combat_level:  28, hitpoints:   35, kill_time_seconds: 12}
 "Gargoyle":          {id: 1543, combat_level: 111, hitpoints:  105, kill_time_seconds: 32}
 "Vorkath":           {id: 8059, combat_level: 732, hitpoints: 1000, kill_time_seconds: 90}
 "Zulrah":            {id: 2042, combat_level: 725, hitpoints:  500, kill_time_seconds: 110}

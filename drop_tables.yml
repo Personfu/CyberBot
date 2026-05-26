@@ -116,3 +116,34 @@ Zulrah:
     - {item: "Rune sword",             quantity: 1,                     weight: 40}
     - {item: "Rune 2h sword",          quantity_range: [1, 1],          weight: 30}
     - {item: "Coal",                   quantity_range: [70, 90],        weight: 48}
+
+# Brutus — Ides of Milk boss (fictional F2P quest, 2025). Respawns in the Lumbridge cow field.
+# Always drops cowhide + beef (free food loop) + bones. Estimated ~54k gp/hr from cowhide banking.
+Brutus:
+  always:
+    - item: "Bones"
+      quantity: 1
+    - item: "Cowhide"
+      quantity: 1
+    - item: "Raw beef"
+      quantity: 1
+  rolls: 1
+  weighted_total: 100
+  entries:
+    - {item: "Coins",    quantity_range: [50, 250], weight: 60}
+    - {item: "Cowhide",  quantity: 1,               weight: 30}
+    - {item: "Raw beef", quantity: 1,               weight: 10}
+
+# Hill Giant — classic F2P money method. Big bones for prayer XP; limpwurt roots for ~1k each.
+"Hill Giant":
+  always:
+    - item: "Big bones"
+      quantity: 1
+  rolls: 1
+  weighted_total: 128
+  entries:
+    - {item: "Coins",         quantity_range: [8, 44],  weight: 50}
+    - {item: "Limpwurt root", quantity: 1,              weight: 25}
+    - {item: "Iron ore",      quantity: 1,              weight: 20}
+    - {item: "Steel axe",     quantity: 1,              weight: 15}
+    - {item: "Mossy key",     quantity: 1,              weight: 18, rare: true}

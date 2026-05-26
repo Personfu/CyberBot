@@ -13,6 +13,9 @@
 "Raw beef":             {id:   2132, ge_price: 50,            stackable: false}
 "Cowhide":              {id:   1739, ge_price: 130,           stackable: false}
 
+"Limpwurt root":        {id:    219, ge_price: 1000,          stackable: false}
+"Iron ore":             {id:    440, ge_price: 100,           stackable: true}
+"Steel axe":            {id:   1353, ge_price: 120,           stackable: false}
 "Mossy key":            {id:  22374, ge_price: 35000,         stackable: true}
 "Granite maul":         {id:   4153, ge_price: 33500,         stackable: false}
 "Steel battleaxe":      {id:   1365, ge_price: 350,           stackable: false}
