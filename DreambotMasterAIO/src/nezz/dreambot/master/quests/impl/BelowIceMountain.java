@@ -40,8 +40,10 @@ public final class BelowIceMountain extends Quest {
                 () -> stage() > 0));
 
         // Stage 1: Recruit companions — Atlax, Marley, and Checkal
-        steps.put(1, QuestStep.walkTo(WILLOW_TILE,
-                () -> stage() >= 2));
+        // They are scattered around Ice Mountain; cycle through names until all recruited.
+        steps.put(1, QuestStep.recruitNPCs(
+                () -> stage() >= 2,
+                "Atlax", "Marley", "Checkal"));
 
         // Stage 2: Enter the ruins beneath Ice Mountain
         steps.put(2, QuestStep.walkTo(RUINS_ENTRY,

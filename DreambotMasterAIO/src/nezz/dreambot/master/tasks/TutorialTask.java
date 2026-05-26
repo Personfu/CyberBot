@@ -71,6 +71,14 @@ public final class TutorialTask extends Task {
     public int execute() {
         if (!Client.isLoggedIn()) return 1200;
 
+        // Fast-path: tutorial already completed on this account.
+        int prog = PlayerSettings.getConfig(Varbits.TUTORIAL_PROGRESS);
+        if (prog >= 1000) {
+            log.info("Tutorial Island already complete — skipping phase.");
+            completed = true;
+            return 600;
+        }
+
         // Click-through any "Click to continue" widget that bleeds across sections.
         eatClickToContinue();
 
@@ -90,7 +98,6 @@ public final class TutorialTask extends Task {
             return Calculations.random(180, 320);
         }
 
-        int prog = PlayerSettings.getConfig(Varbits.TUTORIAL_PROGRESS);
         switch (prog) {
             case 0: case 7:                                   talkTo(NpcID.RUNESCAPE_GUIDE, "RuneScape Guide"); break;
             case 3:                                           /* opened settings */            break;

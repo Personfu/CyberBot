@@ -109,6 +109,31 @@ public abstract class QuestStep {
         };
     }
 
+    /**
+     * Step that tries to find and talk to any one of the given NPC names each tick.
+     * Useful for quests that require recruiting multiple companions whose individual
+     * sub-stages aren't tracked — just cycle through names, talk to whoever is found,
+     * and let the game's varbit advance once all are done.
+     */
+    public static QuestStep recruitNPCs(BooleanSupplier doneCheck, String... npcNames) {
+        return new QuestStep() {
+            @Override public String label() { return "recruit:" + String.join("+", npcNames); }
+            @Override public boolean isDone() { return doneCheck.getAsBoolean(); }
+            @Override public void tick() {
+                if (Dialogues.canContinue()) { Dialogues.clickContinue(); return; }
+                if (Dialogues.areOptionsAvailable()) { Dialogues.clickOption(1); return; }
+                for (String name : npcNames) {
+                    NPC npc = NPCs.closest(name);
+                    if (npc == null) continue;
+                    if (!npc.isOnScreen()) { Walking.walk(npc.getTile()); return; }
+                    npc.interact("Talk-to");
+                    Sleep.sleepUntil(() -> Dialogues.canContinue() || Dialogues.areOptionsAvailable(), 1800);
+                    return;
+                }
+            }
+        };
+    }
+
     public static QuestStep noop(String label) {
         return new QuestStep() {
             @Override public String label() { return "noop:" + label; }
