@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 460" width="900" height="460">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#0c1015"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0H0V20" fill="none" stroke="#1a2535" stroke-width="0.4"/>
+    </pattern>
+    <style>
+      .title { font: bold 18px Consolas,monospace; fill:#ffd54a; }
+      .sub   { font: 11px Consolas,monospace; fill:#9aa6b3; }
+      .lab   { font: 11px Consolas,monospace; fill:#dbe1eb; }
+      .pt    { fill:#ffd54a; stroke:#0c1015; stroke-width:0.8; }
+      .ctrl  { fill:#5c67f2; stroke:#0c1015; stroke-width:0.8; }
+      .end   { fill:#00dc82; stroke:#0c1015; stroke-width:0.8; }
+      .path-l{ fill:none; stroke:#ff5f56; stroke-width:1.5; stroke-dasharray:4 4; }
+      .path-c{ fill:none; stroke:#00dc82; stroke-width:1.8; }
+      .path-h{ fill:none; stroke:#5c67f2; stroke-width:1; opacity:0.45; }
+    </style>
+  </defs>
+  <rect width="900" height="460" fill="url(#bg)"/>
+  <rect width="900" height="460" fill="url(#grid)"/>
+
+  <text x="30" y="36" class="title">HumanMouse — Bezier path with overshoot + tremor</text>
+  <text x="30" y="56" class="sub">cubic Bezier (P0, C1, C2, P3) · per-segment ms ∈ [6,11] · gaussian tremor σ ≈ 1.4 px · overshoot 18% of moves</text>
+
+  <!-- Linear baseline (what a naive mouse would do) -->
+  <path class="path-l" d="M100 380 L780 110"/>
+
+  <!-- Bezier curve -->
+  <path class="path-c" d="M100 380 C 260 180, 520 460, 780 110"/>
+
+  <!-- Overshoot tail -->
+  <path class="path-c" d="M780 110 L820 80 L800 100" stroke-dasharray="3 3"/>
+
+  <!-- Tremor-stippled sample path (low-opacity dots to suggest jitter) -->
+  <g fill="#dbe1eb" opacity="0.85">
+    <circle cx="123" cy="362" r="1.4"/>
+    <circle cx="148" cy="340" r="1.4"/>
+    <circle cx="176" cy="316" r="1.4"/>
+    <circle cx="205" cy="289" r="1.4"/>
+    <circle cx="236" cy="262" r="1.4"/>
+    <circle cx="270" cy="237" r="1.4"/>
+    <circle cx="304" cy="217" r="1.4"/>
+    <circle cx="338" cy="204" r="1.4"/>
+    <circle cx="372" cy="200" r="1.4"/>
+    <circle cx="404" cy="204" r="1.4"/>
+    <circle cx="436" cy="216" r="1.4"/>
+    <circle cx="468" cy="234" r="1.4"/>
+    <circle cx="500" cy="254" r="1.4"/>
+    <circle cx="532" cy="270" r="1.4"/>
+    <circle cx="566" cy="278" r="1.4"/>
+    <circle cx="600" cy="276" r="1.4"/>
+    <circle cx="634" cy="262" r="1.4"/>
+    <circle cx="666" cy="234" r="1.4"/>
+    <circle cx="698" cy="196" r="1.4"/>
+    <circle cx="730" cy="156" r="1.4"/>
+    <circle cx="762" cy="123" r="1.4"/>
+  </g>
+
+  <!-- Control points -->
+  <circle cx="100" cy="380" r="6" class="pt"/>
+  <text x="76" y="402" class="lab">P0 start</text>
+  <circle cx="260" cy="180" r="5" class="ctrl"/>
+  <text x="208" y="170" class="lab">C1 control</text>
+  <circle cx="520" cy="460" r="5" class="ctrl" cy="350"/>
+  <text x="490" y="376" class="lab">C2 control</text>
+  <circle cx="780" cy="110" r="6" class="end"/>
+  <text x="794" y="106" class="lab">P3 target</text>
+
+  <!-- Legend -->
+  <g transform="translate(30,400)">
+    <rect x="0"   y="-12" width="14" height="3" fill="#ff5f56"/>
+    <text x="22"  y="-8" class="lab">naive line (no antiban — easily fingerprinted)</text>
+    <rect x="290" y="-12" width="14" height="3" fill="#00dc82"/>
+    <text x="312" y="-8" class="lab">HumanMouse bezier (curved · overshoots · tremor)</text>
+  </g>
+</svg>

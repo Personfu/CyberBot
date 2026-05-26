@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 600" width="720" height="600">
+  <defs>
+    <style>
+      .win   { fill:#0f1216; stroke:#2c3a4f; stroke-width:1; }
+      .bg    { fill:#161a20; }
+      .tab   { fill:#1a2230; stroke:#2c3a4f; rx:3; }
+      .tab-a { fill:#2a3a55; stroke:#5c67f2; stroke-width:1.4; rx:3; }
+      .field { fill:#0f1216; stroke:#2c3a4f; rx:3; }
+      .check { fill:#0f1216; stroke:#2c3a4f; }
+      .check-on { fill:#00dc82; }
+      .btn   { fill:#1a2230; stroke:#2c3a4f; rx:3; }
+      .btn-p { fill:#143018; stroke:#00dc82; rx:3; }
+      .title { font: bold 14px Consolas,monospace; fill:#ffd54a; }
+      .h     { font: bold 12px Consolas,monospace; fill:#00dc82; }
+      .lab   { font: 11px Consolas,monospace; fill:#dbe1eb; }
+      .sub   { font: 10px Consolas,monospace; fill:#9aa6b3; }
+      .place { font: 11px Consolas,monospace; fill:#6b7588; }
+    </style>
+  </defs>
+
+  <!-- Window frame -->
+  <rect x="10" y="10" width="700" height="580" class="win"/>
+  <rect x="10" y="10" width="700" height="28" fill="#0c1015" stroke="#2c3a4f"/>
+  <circle cx="26" cy="24" r="5" fill="#ff5f56"/>
+  <circle cx="44" cy="24" r="5" fill="#ffbd2e"/>
+  <circle cx="62" cy="24" r="5" fill="#27c93f"/>
+  <text x="86" y="29" class="lab">FLLC Master AIO — Config</text>
+
+  <!-- Header bar -->
+  <rect x="10" y="38" width="700" height="40" class="bg"/>
+  <text x="200" y="64" class="title">FLLC Master AIO — From-Zero Account Builder</text>
+
+  <!-- Tabs -->
+  <rect x="20" y="86"  width="100" height="26" class="tab-a"/>
+  <text x="34"  y="103" class="lab">Account</text>
+  <rect x="124" y="86"  width="60"  height="26" class="tab"/>
+  <text x="138" y="103" class="lab">Plan</text>
+  <rect x="188" y="86"  width="68"  height="26" class="tab"/>
+  <text x="200" y="103" class="lab">Quests</text>
+  <rect x="260" y="86"  width="76"  height="26" class="tab"/>
+  <text x="272" y="103" class="lab">Antiban</text>
+  <rect x="340" y="86"  width="124" height="26" class="tab"/>
+  <text x="354" y="103" class="lab">Stop &amp; Notify</text>
+
+  <!-- Tab body: Account -->
+  <rect x="20" y="112" width="680" height="380" fill="#1a1f27" stroke="#2c3a4f"/>
+
+  <g transform="translate(40,134)">
+    <text x="0" y="0" class="lab">Email</text>
+    <rect x="180" y="-14" width="430" height="22" class="field"/>
+    <text x="188" y="2" class="place">player@gmail.com</text>
+  </g>
+  <g transform="translate(40,168)">
+    <text x="0" y="0" class="lab">Password</text>
+    <rect x="180" y="-14" width="430" height="22" class="field"/>
+    <text x="188" y="2" class="place">••••••••••••</text>
+  </g>
+  <g transform="translate(40,202)">
+    <text x="0" y="0" class="lab">Name (display)</text>
+    <rect x="180" y="-14" width="430" height="22" class="field"/>
+    <text x="188" y="2" class="place">cyber_zero_42</text>
+  </g>
+  <g transform="translate(40,236)">
+    <text x="0" y="0" class="lab">Age</text>
+    <rect x="180" y="-14" width="430" height="22" class="field"/>
+    <text x="188" y="2" class="place">1990-01-01</text>
+  </g>
+  <g transform="translate(40,270)">
+    <text x="0" y="0" class="lab">Mule account</text>
+    <rect x="180" y="-14" width="430" height="22" class="field"/>
+    <text x="188" y="2" class="place">mule_main</text>
+  </g>
+  <g transform="translate(40,304)">
+    <text x="0" y="0" class="lab">Mule world</text>
+    <rect x="180" y="-14" width="430" height="22" class="field"/>
+    <text x="188" y="2" class="place">301</text>
+  </g>
+  <g transform="translate(40,338)">
+    <text x="0" y="0" class="lab">Use quickstart</text>
+    <rect x="180" y="-12" width="16" height="16" class="check"/>
+    <rect x="183" y="-9"  width="10" height="10" class="check-on"/>
+  </g>
+
+  <!-- HUD preview -->
+  <rect x="40" y="370" width="640" height="100" class="bg" stroke="#2c3a4f"/>
+  <text x="50" y="390" class="h">HUD preview (in-game paint overlay)</text>
+  <text x="50" y="412" class="lab">Phase:   <tspan fill="#ffd54a">QUEST Cook's Assistant</tspan></text>
+  <text x="50" y="430" class="lab">Task:    <tspan fill="#ffd54a">quest:Cook's Assistant:1</tspan></text>
+  <text x="50" y="448" class="lab">State:   <tspan fill="#ffd54a">QUESTING</tspan>            Antiban: <tspan fill="#00dc82">ON</tspan>   Breaks: <tspan fill="#ffd54a">next 47m</tspan></text>
+  <text x="50" y="466" class="lab">Total XP: <tspan fill="#ffd54a">14.1K</tspan>          Runtime: <tspan fill="#ffd54a">01:23:45</tspan></text>
+
+  <!-- Footer buttons -->
+  <rect x="20" y="502" width="680" height="42" fill="#1a1f27" stroke="#2c3a4f"/>
+  <rect x="478" y="510" width="56" height="26" class="btn"/>
+  <text x="488" y="528" class="lab">Load…</text>
+  <rect x="538" y="510" width="56" height="26" class="btn"/>
+  <text x="548" y="528" class="lab">Save…</text>
+  <rect x="598" y="510" width="56" height="26" class="btn-p"/>
+  <text x="610" y="528" class="lab">Start</text>
+  <rect x="658" y="510" width="38" height="26" class="btn"/>
+  <text x="664" y="528" class="lab">Stop</text>
+
+  <text x="20" y="560" class="sub">Profile is saved as flat .properties so it survives DreamBot version updates and round-trips through Git.</text>
+  <text x="20" y="578" class="sub">"Plan" tab lets you reorder phases (drag) and add custom Quest / Skill / Mule steps without editing code.</text>
+</svg>

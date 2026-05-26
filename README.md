@@ -18,6 +18,8 @@
 [![Repo](https://img.shields.io/badge/GitHub-Personfu%2FCyberBot-161b22?style=for-the-badge&logo=github)](https://github.com/Personfu/CyberBot)
 [![Build](https://img.shields.io/badge/Build-Passing-00ff88?style=for-the-badge&logo=powershell)](DreambotAllInOne/build.ps1)
 
+![master aio banner](assets/master/banner.svg)
+
 </div>
 
 ---
@@ -25,12 +27,20 @@
 > **Java — an outdated language?** Maybe. But did we absolutely *smoke* it with this project?  
 > **Undeniably.** Welcome to CyberBot — where 1990s bytecode meets 2025 cyber operations.
 
+> **New in v2.x:** [`DreambotMasterAIO`](DreambotMasterAIO/) — a from-zero account builder that drives a fresh F2P account through Tutorial Island, ten F2P quests, and the first 30-40 levels of the priority skills (Attack, Strength, Defense, Ranged, Magic, Prayer, Mining, Woodcutting, Fishing). Architecture cribbed from commercial AIOs (Slug, HowP2P, Dreamy, Sub Builder, Guester); source open and MIT.
+
 ---
 
 ## Table of Contents
 
 - [What Is CyberBot?](#what-is-cyberbot)
 - [Project Layout](#project-layout)
+- [FLLC Master AIO (new)](#fllc-master-aio-new)
+  - [Master AIO Architecture](#master-aio-architecture)
+  - [Build Plan](#build-plan)
+  - [Antiban + Human Mouse](#antiban--human-mouse)
+  - [GUI Mockup](#gui-mockup)
+  - [Feature Matrix vs. Commercial AIOs](#feature-matrix-vs-commercial-aios)
 - [FLLC All-In-One Script](#fllc-all-in-one-script)
   - [Features at a Glance](#features-at-a-glance)
   - [Script State Machine](#script-state-machine)
@@ -64,12 +74,84 @@ CyberBot is a **dual-module OSRS automation suite** built for [DreamBot](https:/
 
 Both modules share the same **CyberWorld philosophy**: data-driven, configurable to the extreme, and built to squeeze every drop of performance out of Java's ancient runtime.
 
+The v2.0 expansion adds a third pillar:
+
+| Module | Purpose |
+| --- | --- |
+| **`DreambotMasterAIO`** | From-zero F2P account builder. Tutorial Island, 10 implemented F2P quests, 9 priority skill modules (with progressive method selection), 14 scaffolded skills, antiban with Bezier mouse + break manager + fatigue model, 5-tab Swing GUI, JSON-free profile persistence. See [`DreambotMasterAIO/README.md`](DreambotMasterAIO/README.md). |
+
+---
+
+## FLLC Master AIO (new)
+
+> ⚠️ OSRS botting violates Jagex's Terms of Service. Use disposable accounts. This module is research / educational code.
+
+A single DreamBot script that drives a fresh account from the login screen through the early F2P curve without you touching the keyboard. Modelled after — but not copied from — commercial DreamBot AIOs: SlugBuilder, HowP2PAIO, Dreamy AIO Skiller Elite, Sub Account Builder, Guester, Hans Crafting, Pfft's Miner.
+
+### Master AIO Architecture
+
+![architecture](assets/master/architecture.svg)
+
+| Layer | File | Responsibility |
+| --- | --- | --- |
+| Entry | [`MasterAIO.java`](DreambotMasterAIO/src/nezz/dreambot/master/core/MasterAIO.java) | `@ScriptManifest`, lifecycle, paint HUD |
+| Plan | [`BuildPlan.java`](DreambotMasterAIO/src/nezz/dreambot/master/profile/BuildPlan.java) | ordered phases, `defaultF2P()` factory |
+| Scheduler | [`TaskScheduler.java`](DreambotMasterAIO/src/nezz/dreambot/master/tasks/TaskScheduler.java) | priority-ordered task pump |
+| Driver | [`BuildPlanTask.java`](DreambotMasterAIO/src/nezz/dreambot/master/tasks/BuildPlanTask.java) | walks plan → materializes subtasks |
+| Tutorial | [`TutorialTask.java`](DreambotMasterAIO/src/nezz/dreambot/master/tasks/TutorialTask.java) | varp-281 state machine, all 12 sections |
+| Quests | [`QuestTask.java`](DreambotMasterAIO/src/nezz/dreambot/master/quests/QuestTask.java) + [`impl/`](DreambotMasterAIO/src/nezz/dreambot/master/quests/impl) | varbit-driven step machine |
+| Skills | [`SkillTask.java`](DreambotMasterAIO/src/nezz/dreambot/master/skills/SkillTask.java) + [`impl/`](DreambotMasterAIO/src/nezz/dreambot/master/skills/impl) | progressive trainers |
+| Antiban | [`HumanMouse.java`](DreambotMasterAIO/src/nezz/dreambot/master/antiban/HumanMouse.java), [`Antiban.java`](DreambotMasterAIO/src/nezz/dreambot/master/antiban/Antiban.java), [`BreakManager.java`](DreambotMasterAIO/src/nezz/dreambot/master/antiban/BreakManager.java) | mouse, events, breaks |
+| GUI | [`MasterGui.java`](DreambotMasterAIO/src/nezz/dreambot/master/gui/MasterGui.java) | 5-tab Swing config |
+| IDs | [`id/`](DreambotMasterAIO/src/nezz/dreambot/master/id) | RuneLite + Quest-Helper ports |
+
+### Build Plan
+
+The default plan walks 20 phases:
+
+![build plan flow](assets/master/build-plan-flow.svg)
+
+Phase order matches the requirements: **Tutorial Island → Cook's Assistant → Sheep Shearer → Romeo & Juliet → Restless Ghost → Goblin Diplomacy → Ernest the Chicken → Vampyre Slayer → Imp Catcher → Witch's Potion → Misthalin Mystery → Attack 20 → Strength 30 → Defense 20 → Ranged 30 → Magic 33 → Prayer 31 → Mining 40 → Woodcutting 40 → Fishing 40.**
+
+### Antiban + Human Mouse
+
+![antiban curve](assets/master/antiban-curve.svg)
+
+`HumanMouse` installs as a DreamBot `MouseAlgorithm` and replaces linear motion with a cubic Bezier curve plus per-segment Gaussian tremor and an 18% chance of overshoot. `Antiban` fires camera / tab / AFK events every 18–45s; `BreakManager` schedules log-outs every 45–90 min for 5–20 min with a rolling 6h/24h fatigue cap.
+
+### GUI Mockup
+
+![gui mockup](assets/master/gui-mockup.svg)
+
+Five tabs: **Account · Plan · Quests · Antiban · Stop & Notify.** Profile state persists as flat `.properties`, so it survives DreamBot version updates and round-trips through Git.
+
+### Feature Matrix vs. Commercial AIOs
+
+![feature matrix](assets/master/feature-matrix.svg)
+
+Honest take: Master AIO is alpha, F2P-focused, and free; the commercial AIOs are production-stable and exhaustive. We're not trying to one-shot them — we're providing a readable, extensible source-available scaffold that you can patch yourself without waiting on a vendor.
+
 ---
 
 ## Project Layout
 
 ```
 CyberBot/
+│
+├── DreambotMasterAIO/              ◄ NEW · From-zero F2P account builder
+│   ├── build.ps1                   ◄ Compile + deploy to DreamBot Scripts
+│   ├── README.md                   ◄ Module-level docs (deep-dive)
+│   └── src/nezz/dreambot/master/
+│       ├── core/                   ◄ MasterAIO, BotState, Logger
+│       ├── profile/                ◄ Profile, BuildPlan
+│       ├── tasks/                  ◄ Task, TaskScheduler, BuildPlanTask, TutorialTask
+│       ├── quests/                 ◄ Quest, QuestStep, QuestRegistry, QuestTask, impl/×10
+│       ├── skills/                 ◄ SkillModule, SkillRegistry, SkillTask, impl/×9 + scaffold
+│       ├── antiban/                ◄ HumanMouse, Antiban, BreakManager
+│       ├── gui/                    ◄ MasterGui (Swing)
+│       ├── id/                     ◄ Varbits, VarPlayer, Quest, ItemID, NpcID,
+│       │                              ObjectID, AnimationID, WidgetID, ItemCollections
+│       └── util/                   ◄ QuantityFormatter (RuneLite port)
 │
 ├── DreambotAllInOne/               ◄ The DreamBot script module
 │   ├── build.ps1                   ◄ One-command compile + deploy (PowerShell)
@@ -87,6 +169,16 @@ CyberBot/
 │       │   └── BankTask.java       ◄ Deposit all except food, withdraw supplies
 │       └── util/
 │           └── QuantityFormatter.java  ◄ "1500000" → "1.5m"
+│
+├── assets/
+│   ├── drop-table-gui.png          ◄ legacy: drop-sim GUI screenshot
+│   └── master/                     ◄ NEW: SVG diagrams for the Master AIO module
+│       ├── banner.svg
+│       ├── architecture.svg
+│       ├── build-plan-flow.svg
+│       ├── antiban-curve.svg
+│       ├── gui-mockup.svg
+│       └── feature-matrix.svg
 │
 ├── DropEntry.java                  ◄ Simulator: one drop-table row
 ├── DropTable.java                  ◄ Simulator: weighted table of entries

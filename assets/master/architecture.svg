@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#0c1015"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#a0a8b3"/>
+    </marker>
+    <style>
+      .box      { fill:#1a2230; stroke:#2c3a4f; stroke-width:1.2; rx:8; }
+      .box-core { fill:#142640; stroke:#5c67f2; stroke-width:1.5; rx:8; }
+      .box-task { fill:#142c25; stroke:#00dc82; stroke-width:1.5; rx:8; }
+      .box-id   { fill:#2e2a1a; stroke:#ffd54a; stroke-width:1.5; rx:8; }
+      .box-anti { fill:#2a1a30; stroke:#a05cf2; stroke-width:1.5; rx:8; }
+      .label    { font-family:Consolas,monospace; font-size:14px; fill:#dbe1eb; font-weight:bold; }
+      .sub      { font-family:Consolas,monospace; font-size:11px; fill:#9aa6b3; }
+      .title    { font-family:Consolas,monospace; font-size:22px; fill:#ffd54a; font-weight:bold; }
+      .header   { font-family:Consolas,monospace; font-size:16px; fill:#00dc82; font-weight:bold; }
+      .edge     { stroke:#6b7588; stroke-width:1.2; fill:none; marker-end:url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1200" height="760" fill="url(#bg)"/>
+  <text x="40" y="46" class="title">FLLC Master AIO — System Architecture</text>
+  <text x="40" y="68" class="sub">Profile → BuildPlan → TaskScheduler → (TutorialTask | QuestTask | SkillTask) → DreamBot API</text>
+
+  <!-- Top: Profile + BuildPlan + GUI -->
+  <g>
+    <rect x="40"  y="100" width="320" height="80" class="box-core"/>
+    <text x="56"  y="124" class="header">Profile + BuildPlan</text>
+    <text x="56"  y="146" class="sub">accountEmail / accountPass / muleAccount</text>
+    <text x="56"  y="162" class="sub">phases: [TUTORIAL, QUEST*10, SKILL_LEVEL*9]</text>
+
+    <rect x="400" y="100" width="320" height="80" class="box-core"/>
+    <text x="416" y="124" class="header">MasterGui (Swing)</text>
+    <text x="416" y="146" class="sub">Account · Plan · Quests · Antiban · Stop</text>
+    <text x="416" y="162" class="sub">save/load .properties, drag-rearrange phases</text>
+
+    <rect x="760" y="100" width="400" height="80" class="box-core"/>
+    <text x="776" y="124" class="header">MasterAIO (@ScriptManifest)</text>
+    <text x="776" y="146" class="sub">onStart → init scheduler · onLoop → tick() · onPaint → HUD</text>
+    <text x="776" y="162" class="sub">extends org.dreambot.api.script.AbstractScript</text>
+  </g>
+
+  <!-- Mid: Scheduler -->
+  <g>
+    <rect x="380" y="220" width="440" height="64" class="box-task"/>
+    <text x="396" y="246" class="header">TaskScheduler</text>
+    <text x="396" y="266" class="sub">Priority list · isReady() picks highest-pri · tick() runs one</text>
+  </g>
+
+  <!-- Tasks row -->
+  <g>
+    <rect x="40"  y="320" width="200" height="110" class="box-task"/>
+    <text x="56"  y="344" class="header">BuildPlanTask</text>
+    <text x="56"  y="364" class="sub">drives plan cursor</text>
+    <text x="56"  y="382" class="sub">materializes phase →</text>
+    <text x="56"  y="400" class="sub">  subtask, swaps on done</text>
+    <text x="56"  y="418" class="sub">pri 100 · state from phase</text>
+
+    <rect x="260" y="320" width="200" height="110" class="box-task"/>
+    <text x="276" y="344" class="header">TutorialTask</text>
+    <text x="276" y="364" class="sub">varp 281 stage machine</text>
+    <text x="276" y="382" class="sub">RuneScape Guide → ... →</text>
+    <text x="276" y="400" class="sub">  Magic Instructor (1000)</text>
+    <text x="276" y="418" class="sub">pri 80 · state TUTORIAL</text>
+
+    <rect x="480" y="320" width="200" height="110" class="box-task"/>
+    <text x="496" y="344" class="header">QuestTask</text>
+    <text x="496" y="364" class="sub">var(bit|p) stage → step</text>
+    <text x="496" y="382" class="sub">10 F2P quests in registry</text>
+    <text x="496" y="400" class="sub">stepFor() lower-bound</text>
+    <text x="496" y="418" class="sub">pri 70 · state QUESTING</text>
+
+    <rect x="700" y="320" width="200" height="110" class="box-task"/>
+    <text x="716" y="344" class="header">SkillTask</text>
+    <text x="716" y="364" class="sub">9 priority skills impl'd</text>
+    <text x="716" y="382" class="sub">14 scaffolded</text>
+    <text x="716" y="400" class="sub">pickMethod() per lvl</text>
+    <text x="716" y="418" class="sub">pri 80 · state SKILLING</text>
+
+    <rect x="920" y="320" width="240" height="110" class="box-anti"/>
+    <text x="936" y="344" class="header">Antiban + BreakManager</text>
+    <text x="936" y="364" class="sub">camera jitter, tab opens</text>
+    <text x="936" y="382" class="sub">AFK drift · break sched</text>
+    <text x="936" y="400" class="sub">fatigue window 6h/24h</text>
+    <text x="936" y="418" class="sub">pri 20 / 5 · injects events</text>
+  </g>
+
+  <!-- Bottom: ID library + DreamBot API -->
+  <g>
+    <rect x="40" y="480" width="540" height="120" class="box-id"/>
+    <text x="56" y="504" class="header">ID Library (port of RuneLite + Quest-Helper)</text>
+    <text x="56" y="524" class="sub">Varbits · VarPlayer · Quest · ItemID · NpcID</text>
+    <text x="56" y="540" class="sub">ObjectID · AnimationID · WidgetID · ItemCollections</text>
+    <text x="56" y="556" class="sub">QuantityFormatter (RL port — K/M/B suffix)</text>
+    <text x="56" y="572" class="sub">curated subsets; full lists extensible</text>
+
+    <rect x="620" y="480" width="540" height="120" class="box"/>
+    <text x="636" y="504" class="header">DreamBot API (provided)</text>
+    <text x="636" y="524" class="sub">Inventory · Equipment · Bank · Dialogues</text>
+    <text x="636" y="540" class="sub">NPCs · GameObjects · Players · Magic</text>
+    <text x="636" y="556" class="sub">Walking · Camera · Tabs · Mouse + algorithm</text>
+    <text x="636" y="572" class="sub">SkillTracker · PlayerSettings · Calculations</text>
+  </g>
+
+  <!-- Hardware-style ground rail -->
+  <rect x="40" y="640" width="1120" height="64" class="box"/>
+  <text x="56" y="664" class="header">Build &amp; Deploy</text>
+  <text x="56" y="684" class="sub">build.ps1 → javac --release 11 → jar → DreamBot\Scripts\FLLCMasterAIO.jar</text>
+
+  <!-- Edges -->
+  <path class="edge" d="M200 180 L500 220"/>
+  <path class="edge" d="M560 180 L580 220"/>
+  <path class="edge" d="M920 180 L660 220"/>
+  <path class="edge" d="M600 280 L140 320"/>
+  <path class="edge" d="M600 280 L360 320"/>
+  <path class="edge" d="M600 280 L580 320"/>
+  <path class="edge" d="M600 280 L800 320"/>
+  <path class="edge" d="M600 280 L1040 320"/>
+  <path class="edge" d="M360 430 L300 480"/>
+  <path class="edge" d="M580 430 L320 480"/>
+  <path class="edge" d="M800 430 L850 480"/>
+  <path class="edge" d="M1040 430 L900 480"/>
+</svg>

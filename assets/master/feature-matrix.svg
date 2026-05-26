@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 520" width="1180" height="520">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"  stop-color="#0c1015"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <style>
+      .title { font: bold 22px Consolas,monospace; fill:#ffd54a; }
+      .sub   { font: 12px Consolas,monospace; fill:#9aa6b3; }
+      .h     { font: bold 13px Consolas,monospace; fill:#00dc82; }
+      .lab   { font: 12px Consolas,monospace; fill:#dbe1eb; }
+      .row   { fill:#1a2230; stroke:#2c3a4f; stroke-width:0.8; }
+      .row-a { fill:#142640; stroke:#5c67f2; stroke-width:0.8; }
+      .yes   { font: bold 16px Consolas,monospace; fill:#00dc82; }
+      .no    { font: 16px Consolas,monospace; fill:#ff5f56; }
+      .part  { font: bold 14px Consolas,monospace; fill:#ffd54a; }
+    </style>
+  </defs>
+  <rect width="1180" height="520" fill="url(#bg)"/>
+
+  <text x="40" y="40" class="title">Feature Matrix — Master AIO vs. DreamBot premium AIOs</text>
+  <text x="40" y="60" class="sub">honest comparison; commercial scripts have years of patches and per-task depth Master AIO doesn't (yet) match</text>
+
+  <!-- Header -->
+  <rect x="40" y="80"  width="520" height="32" class="row-a"/>
+  <rect x="560" y="80" width="120" height="32" class="row-a"/>
+  <rect x="680" y="80" width="120" height="32" class="row-a"/>
+  <rect x="800" y="80" width="120" height="32" class="row-a"/>
+  <rect x="920" y="80" width="120" height="32" class="row-a"/>
+  <rect x="1040" y="80" width="100" height="32" class="row-a"/>
+  <text x="56"  y="100" class="h">Feature</text>
+  <text x="576" y="100" class="h">Master AIO</text>
+  <text x="696" y="100" class="h">SlugBuilder</text>
+  <text x="816" y="100" class="h">HowP2PAIO</text>
+  <text x="936" y="100" class="h">Dreamy AIO</text>
+  <text x="1056" y="100" class="h">Sub Quester</text>
+
+  <!-- Row helper text -->
+  <g>
+    <!-- 1 -->
+    <rect x="40" y="116" width="520" height="32" class="row"/>
+    <text x="56" y="136" class="lab">Tutorial Island automation</text>
+    <text x="600" y="138" class="yes">✓</text>
+    <text x="720" y="138" class="yes">✓</text>
+    <text x="840" y="138" class="yes">✓</text>
+    <text x="960" y="138" class="yes">✓</text>
+    <text x="1080" y="138" class="no">✗</text>
+
+    <!-- 2 -->
+    <rect x="40" y="152" width="520" height="32" class="row"/>
+    <text x="56" y="172" class="lab">10+ F2P quests</text>
+    <text x="600" y="174" class="yes">✓</text>
+    <text x="720" y="174" class="yes">✓</text>
+    <text x="840" y="174" class="yes">✓</text>
+    <text x="960" y="174" class="yes">✓</text>
+    <text x="1080" y="174" class="yes">✓</text>
+
+    <!-- 3 -->
+    <rect x="40" y="188" width="520" height="32" class="row"/>
+    <text x="56" y="208" class="lab">100+ quests (F2P + P2P + diaries)</text>
+    <text x="600" y="210" class="no">✗</text>
+    <text x="720" y="210" class="part">~70</text>
+    <text x="840" y="210" class="yes">109</text>
+    <text x="960" y="210" class="part">~50</text>
+    <text x="1080" y="210" class="yes">101</text>
+
+    <!-- 4 -->
+    <rect x="40" y="224" width="520" height="32" class="row"/>
+    <text x="56" y="244" class="lab">23 skills (priority + scaffolded)</text>
+    <text x="600" y="246" class="part">9 + 14</text>
+    <text x="720" y="246" class="yes">23</text>
+    <text x="840" y="246" class="yes">22</text>
+    <text x="960" y="246" class="yes">20</text>
+    <text x="1080" y="246" class="no">✗</text>
+
+    <!-- 5 -->
+    <rect x="40" y="260" width="520" height="32" class="row"/>
+    <text x="56" y="280" class="lab">Multiple training methods per skill</text>
+    <text x="600" y="282" class="part">priority skills</text>
+    <text x="720" y="282" class="yes">extensive</text>
+    <text x="840" y="282" class="yes">extensive</text>
+    <text x="960" y="282" class="yes">extensive</text>
+    <text x="1080" y="282" class="no">N/A</text>
+
+    <!-- 6 -->
+    <rect x="40" y="296" width="520" height="32" class="row"/>
+    <text x="56" y="316" class="lab">Human mouse algorithm (Bezier + overshoot)</text>
+    <text x="600" y="318" class="yes">✓</text>
+    <text x="720" y="318" class="yes">✓</text>
+    <text x="840" y="318" class="yes">✓</text>
+    <text x="960" y="318" class="yes">✓</text>
+    <text x="1080" y="318" class="yes">✓</text>
+
+    <!-- 7 -->
+    <rect x="40" y="332" width="520" height="32" class="row"/>
+    <text x="56" y="352" class="lab">Break manager + fatigue model</text>
+    <text x="600" y="354" class="yes">✓</text>
+    <text x="720" y="354" class="yes">✓</text>
+    <text x="840" y="354" class="yes">✓</text>
+    <text x="960" y="354" class="yes">✓</text>
+    <text x="1080" y="354" class="part">basic</text>
+
+    <!-- 8 -->
+    <rect x="40" y="368" width="520" height="32" class="row"/>
+    <text x="56" y="388" class="lab">Muling / cross-account GP transfer</text>
+    <text x="600" y="390" class="part">config-only</text>
+    <text x="720" y="390" class="yes">✓</text>
+    <text x="840" y="390" class="part">basic</text>
+    <text x="960" y="390" class="yes">✓</text>
+    <text x="1080" y="390" class="no">✗</text>
+
+    <!-- 9 -->
+    <rect x="40" y="404" width="520" height="32" class="row"/>
+    <text x="56" y="424" class="lab">Discord webhook notifications</text>
+    <text x="600" y="426" class="part">config</text>
+    <text x="720" y="426" class="yes">✓</text>
+    <text x="840" y="426" class="yes">✓</text>
+    <text x="960" y="426" class="yes">✓</text>
+    <text x="1080" y="426" class="part">basic</text>
+
+    <!-- 10 -->
+    <rect x="40" y="440" width="520" height="32" class="row"/>
+    <text x="56" y="460" class="lab">Source available + MIT-licensed</text>
+    <text x="600" y="462" class="yes">✓</text>
+    <text x="720" y="462" class="no">closed</text>
+    <text x="840" y="462" class="no">closed</text>
+    <text x="960" y="462" class="no">closed</text>
+    <text x="1080" y="462" class="no">closed</text>
+
+    <!-- 11 -->
+    <rect x="40" y="476" width="520" height="32" class="row"/>
+    <text x="56" y="496" class="lab">Price</text>
+    <text x="588" y="498" class="yes">$0 (MIT)</text>
+    <text x="700" y="498" class="part">$15–25/mo</text>
+    <text x="820" y="498" class="part">$10–20/mo</text>
+    <text x="940" y="498" class="part">lifetime $</text>
+    <text x="1056" y="498" class="part">lifetime $</text>
+  </g>
+</svg>
