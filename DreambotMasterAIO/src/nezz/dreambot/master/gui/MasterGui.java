@@ -215,6 +215,12 @@ public final class MasterGui extends JFrame {
         addRow(p, c, "Break for – min (m)",   intField(profile.breakDurationMinM, v -> profile.breakDurationMinM = v));
         addRow(p, c, "Break for – max (m)",   intField(profile.breakDurationMaxM, v -> profile.breakDurationMaxM = v));
         addRow(p, c, "Active hrs / 24h",      intField(profile.fatigueWindowH,    v -> profile.fatigueWindowH    = v));
+        section(p, c, "// NIGHT SLEEP");
+        addRow(p, c, "Enable night sleep",    checkbox(profile.enableNightSleep,    v -> profile.enableNightSleep    = v));
+        addRow(p, c, "Sleep from (hour 0–23)", intField(profile.nightSleepStartHour, v -> profile.nightSleepStartHour = v));
+        addRow(p, c, "Wake at (hour 0–23)",    intField(profile.nightSleepEndHour,   v -> profile.nightSleepEndHour   = v));
+        section(p, c, "// WORLD HOP");
+        addRow(p, c, "Enable world hopping",  checkbox(profile.enableWorldHop, v -> profile.enableWorldHop = v));
         return p;
     }
 

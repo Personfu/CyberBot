@@ -110,9 +110,14 @@ public final class Profile {
         p.setProperty("notifyOnBan",       String.valueOf(notifyOnBan));
         p.setProperty("notifyOnLevel",     String.valueOf(notifyOnLevel));
         p.setProperty("notifyOnQuest",     String.valueOf(notifyOnQuest));
-        p.setProperty("stopAfterHours",    String.valueOf(stopAfterHours));
-        p.setProperty("stopAtTotalXp",     String.valueOf(stopAtTotalXp));
-        p.setProperty("stopOnTradeReq",    String.valueOf(stopOnTradeReq));
+        p.setProperty("stopAfterHours",      String.valueOf(stopAfterHours));
+        p.setProperty("stopAtTotalXp",       String.valueOf(stopAtTotalXp));
+        p.setProperty("stopOnTradeReq",      String.valueOf(stopOnTradeReq));
+        p.setProperty("enableNightSleep",    String.valueOf(enableNightSleep));
+        p.setProperty("nightSleepStartHour", String.valueOf(nightSleepStartHour));
+        p.setProperty("nightSleepEndHour",   String.valueOf(nightSleepEndHour));
+        p.setProperty("enableWorldHop",      String.valueOf(enableWorldHop));
+        p.setProperty("accountSeed",         String.valueOf(accountSeed));
         try (var w = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
             p.store(w, "MasterAIO profile");
         }
@@ -146,8 +151,13 @@ public final class Profile {
         out.notifyOnLevel     = parseB(p, "notifyOnLevel",    out.notifyOnLevel);
         out.notifyOnQuest     = parseB(p, "notifyOnQuest",    out.notifyOnQuest);
         out.stopAfterHours    = parseI(p, "stopAfterHours",   out.stopAfterHours);
-        out.stopAtTotalXp     = parseL(p, "stopAtTotalXp",    out.stopAtTotalXp);
-        out.stopOnTradeReq    = parseB(p, "stopOnTradeReq",   out.stopOnTradeReq);
+        out.stopAtTotalXp        = parseL(p, "stopAtTotalXp",        out.stopAtTotalXp);
+        out.stopOnTradeReq       = parseB(p, "stopOnTradeReq",       out.stopOnTradeReq);
+        out.enableNightSleep     = parseB(p, "enableNightSleep",     out.enableNightSleep);
+        out.nightSleepStartHour  = parseI(p, "nightSleepStartHour",  out.nightSleepStartHour);
+        out.nightSleepEndHour    = parseI(p, "nightSleepEndHour",    out.nightSleepEndHour);
+        out.enableWorldHop       = parseB(p, "enableWorldHop",       out.enableWorldHop);
+        out.accountSeed          = parseL(p, "accountSeed",          out.accountSeed);
         return out;
     }
 
