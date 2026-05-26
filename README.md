@@ -1,6 +1,18 @@
-﻿# CyberBot - DreamBot F2P All-in-One
+﻿<div align="center">
+  <img src="assets/master/banner.svg" width="100%" alt="CyberBot banner"/>
+</div>
 
-> **Full F2P account builder**: Tutorial Island to 22+ quests to route-to-99 all skills to Grand Exchange to repeat.
+<div align="center">
+
+**Full F2P account builder** — Tutorial Island → 23 quests → route-to-99 all skills → Grand Exchange → repeat.
+
+</div>
+
+---
+
+<div align="center">
+  <img src="assets/master/architecture.svg" width="100%" alt="Architecture overview"/>
+</div>
 
 ---
 
@@ -47,6 +59,8 @@
 
 ### Skill Modules (Route to 99 Everything)
 
+<img src="assets/master/build-plan-flow.svg" width="100%" alt="Build plan flow"/>
+
 | Skill | Training Method |
 |---|---|
 | Attack / Strength / Defence / HP | Brutus > cows > goblins > ogresses |
@@ -68,7 +82,11 @@
 - Restocks consumables (food, arrows, runes) via GE buy orders
 - Mule support: trade excess GP to a designated mule account
 
+<img src="assets/master/gui-mockup.svg" width="100%" alt="GUI mockup"/>
+
 ### Antiban System
+
+<img src="assets/master/antiban-curve.svg" width="100%" alt="Antiban human mouse curve"/>
 
 | Feature | Description |
 |---|---|
@@ -85,10 +103,14 @@
 
 ## Build
 
-`powershell
+```powershell
 cd DreambotMasterAIO
 .\build.ps1
-`"
+```
+
+---
+
+<img src="assets/master/feature-matrix.svg" width="100%" alt="Feature comparison matrix"/>
 
 ## Legal Notice
 
