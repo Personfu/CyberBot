@@ -136,13 +136,16 @@ public final class BuildPlan {
         p.add(new Phase(PhaseType.MONEY_MAKING, "flax_spin",  0).opt("gpTarget", 300_000));
         p.add(new Phase(PhaseType.MONEY_MAKING, "cowhide",    0).opt("gpTarget", 200_000));
 
-        // PHASE 12: Brutus main grind
+        // PHASE 12: Brutus main grind + Varrock Sewers Moss Giant safe-spot (primary anti-detection trainer)
+        // MossGiant module navigates to Varrock Sewers manhole (~3289,3394), cuts cobwebs with knife,
+        // safe-spots by the wall in the back room and casts the best available spell until Magic 55.
+        // Big bones are buried every kill for free Prayer XP. No damage taken = no eating tells.
+        p.add(new Phase(PhaseType.SKILL_LEVEL, "MossGiant", 55));  // Magic 1→55 via safe-spot
+        p.add(new Phase(PhaseType.SKILL_LEVEL, "Ranged",    50));  // ranged safe-spot same room
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Brutus",    70));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Attack",    70));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Strength",  70));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Defense",   70));
-        p.add(new Phase(PhaseType.SKILL_LEVEL, "Ranged",    50));
-        p.add(new Phase(PhaseType.SKILL_LEVEL, "Magic",     55));
 
         // PHASE 13: High skill building
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Mining",       60));

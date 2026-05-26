@@ -94,6 +94,14 @@ public final class ObjectID {
     public static final int RC_FIRE_ALTAR           = 14905;
     public static final int RC_BODY_ALTAR           = 14907;
 
+    // ── Varrock Sewers ─────────────────────────────────────────────────────────
+    /** Manhole cover on the surface — interact "Open" then "Climb-down". */
+    public static final int MANHOLE_VARROCK_SEWER_LID = 886;
+    /** Opened manhole — interact "Climb-down". */
+    public static final int MANHOLE_VARROCK_SEWER_OPEN = 2574;
+    /** Cobweb blocking the path to the Moss Giant back room — slash with knife. */
+    public static final int COBWEB_VARROCK_SEWER      = 733;
+
     // ── F2P quest objects ────────────────────────────────────────────────────
     public static final int LUMBRIDGE_KITCHEN_LADDER = 23823;
     public static final int VARROCK_CHURCH_DOOR     = 11797;

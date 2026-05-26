@@ -10,6 +10,7 @@ import nezz.dreambot.master.skills.impl.FishingModule;
 import nezz.dreambot.master.skills.impl.FletchingModule;
 import nezz.dreambot.master.skills.impl.MagicModule;
 import nezz.dreambot.master.skills.impl.MiningModule;
+import nezz.dreambot.master.skills.impl.MossGiantModule;
 import nezz.dreambot.master.skills.impl.PrayerModule;
 import nezz.dreambot.master.skills.impl.RangedModule;
 import nezz.dreambot.master.skills.impl.RunecraftingModule;
@@ -38,6 +39,7 @@ public final class SkillRegistry {
         register(new DefenseModule());
         register(new RangedModule());
         register(new MagicModule());
+        register(new MossGiantModule());
         register(new PrayerModule());
         register(new MiningModule());
         register(new WoodcuttingModule());

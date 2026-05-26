@@ -65,6 +65,9 @@ public final class ItemID {
     public static final int OILY_FISHING_ROD      = 1585;
     public static final int BIG_FISHING_NET       = 305;
 
+    // ── Tools ─────────────────────────────────────────────────────────────────
+    public static final int KNIFE                 = 946;
+
     // ── Mining picks ─────────────────────────────────────────────────────────
     public static final int BRONZE_PICKAXE        = 1265;
     public static final int IRON_PICKAXE          = 1267;
