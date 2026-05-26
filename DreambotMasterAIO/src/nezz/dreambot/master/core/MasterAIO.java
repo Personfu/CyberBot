@@ -6,6 +6,7 @@ import nezz.dreambot.master.antiban.HumanMouse;
 import nezz.dreambot.master.gui.MasterGui;
 import nezz.dreambot.master.profile.BuildPlan;
 import nezz.dreambot.master.profile.Profile;
+import nezz.dreambot.master.money.MoneyRouteTask;
 import nezz.dreambot.master.tasks.BuildPlanTask;
 import nezz.dreambot.master.tasks.Task;
 import nezz.dreambot.master.tasks.TaskScheduler;
@@ -238,11 +239,22 @@ public class MasterAIO extends AbstractScript {
 
         row(g2, tx, ty, PW - 16, "TOTAL XP", QuantityFormatter.format(totalXp)); ty += 13;
 
-        // XP gain this session via SkillTracker
-        long gainedXp = 0;
-        try { for (Skill s : Skill.values()) gainedXp += SkillTracker.getGainedExperience(s); }
-        catch (Throwable ignored) { }
-        row(g2, tx, ty, PW - 16, "XP GAINED", QuantityFormatter.format(gainedXp)); ty += 13;
+        // XP gain this session, OR GP progress when money-making
+        Task activeTask = scheduler != null ? scheduler.active() : null;
+        if (activeTask instanceof MoneyRouteTask) {
+            MoneyRouteTask mrt = (MoneyRouteTask) activeTask;
+            long tgt = mrt.gpTarget();
+            String gpLine = tgt > 0
+                    ? QuantityFormatter.format(mrt.gpEstimated()) + " / " + QuantityFormatter.format(tgt) + " gp"
+                    : QuantityFormatter.format(mrt.gpEstimated()) + " gp est.";
+            row(g2, tx, ty, PW - 16, "GP EARNED", gpLine);
+        } else {
+            long gainedXp = 0;
+            try { for (Skill s : Skill.values()) gainedXp += SkillTracker.getGainedExperience(s); }
+            catch (Throwable ignored) { }
+            row(g2, tx, ty, PW - 16, "XP GAINED", QuantityFormatter.format(gainedXp));
+        }
+        ty += 13;
 
         row(g2, tx, ty, PW - 16, "ANTIBAN",  profile.humanMouse ? "ACTIVE" : "OFF"); ty += 13;
         row(g2, tx, ty, PW - 16, "BREAKS",   breaks == null ? "--" : breaks.status());

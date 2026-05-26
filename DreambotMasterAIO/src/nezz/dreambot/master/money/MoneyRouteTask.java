@@ -29,8 +29,8 @@ public final class MoneyRouteTask extends Task {
     private final Logger    log;
 
     private MoneyRoute active;
-    private long       gpEarned = 0;
-    private boolean    done     = false;
+    private long       startTime = 0;       // ms when route was first selected
+    private boolean    done      = false;
 
     public MoneyRouteTask(String routeId, long gpTarget, Logger log) {
         this.targetRouteId = routeId;
@@ -43,6 +43,16 @@ public final class MoneyRouteTask extends Task {
     @Override public boolean isReady()  { return !done; }
     @Override public boolean isComplete() { return done; }
 
+    /** Estimated GP earned so far based on route's GP/hr and elapsed time. */
+    public long gpEstimated() {
+        if (active == null || startTime == 0) return 0L;
+        long elapsed = System.currentTimeMillis() - startTime;
+        return (long)(active.estimatedGpHr() * (elapsed / 3_600_000.0));
+    }
+
+    /** GP target for this phase (0 = unlimited). */
+    public long gpTarget() { return gpTarget; }
+
     @Override public int execute() {
         if (active == null) {
             active = selectRoute();
@@ -51,11 +61,12 @@ public final class MoneyRouteTask extends Task {
                 done = true;
                 return 200;
             }
+            startTime = System.currentTimeMillis();
             log.info("MoneyRoute selected: " + active.id() + " (~" + active.estimatedGpHr() + " gp/hr)");
         }
 
-        if (gpTarget > 0 && gpEarned >= gpTarget) {
-            log.info("GP target " + gpTarget + " reached.");
+        if (gpTarget > 0 && gpEstimated() >= gpTarget) {
+            log.info("GP target " + gpTarget + " reached (estimated " + gpEstimated() + " earned).");
             done = true;
             return 200;
         }
@@ -65,7 +76,9 @@ public final class MoneyRouteTask extends Task {
     }
 
     @Override public String label() {
-        return "money[" + (active == null ? "selecting" : active.id()) + "]";
+        String gp = gpTarget > 0 ? (gpEstimated() / 1000) + "k/" + (gpTarget / 1000) + "k gp" : "";
+        return "money[" + (active == null ? "selecting" : active.id())
+                + (gp.isEmpty() ? "" : " " + gp) + "]";
     }
 
     // ── route selection ──────────────────────────────────────────────────────
