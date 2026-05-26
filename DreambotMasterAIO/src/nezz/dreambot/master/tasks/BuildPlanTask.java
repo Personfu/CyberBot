@@ -2,6 +2,8 @@ package nezz.dreambot.master.tasks;
 
 import nezz.dreambot.master.core.BotState;
 import nezz.dreambot.master.core.Logger;
+import nezz.dreambot.master.money.MoneyRouteRegistry;
+import nezz.dreambot.master.money.MoneyRouteTask;
 import nezz.dreambot.master.profile.BuildPlan;
 import nezz.dreambot.master.profile.Profile;
 import nezz.dreambot.master.quests.QuestRegistry;
@@ -76,6 +78,14 @@ public final class BuildPlanTask extends Task {
                         .map(s -> (Task) new SkillTask(s, p.value, profile, log))
                         .orElseGet(() -> new NoopTask("skill:" + p.target));
                 break;
+            case MONEY_MAKING: {
+                String routeId = p.target; // e.g. "ChickenRoute"
+                long gpTarget = 0;
+                Object gpOpt = p.options.get("gpTarget");
+                if (gpOpt instanceof Number) gpTarget = ((Number) gpOpt).longValue();
+                currentSubtask = new MoneyRouteTask(routeId, gpTarget, log);
+                break;
+            }
             default:
                 log.warn("Phase type " + p.type + " not yet implemented, skipping.");
                 profile.plan.advance();

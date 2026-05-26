@@ -6,6 +6,7 @@
 $JAVAC      = "$env:USERPROFILE\Downloads\jdk-26.0.1\bin\javac.exe"
 $JAR_TOOL   = "$env:USERPROFILE\Downloads\jdk-26.0.1\bin\jar.exe"
 $DB_API     = "$env:USERPROFILE\DreamBot\BotData\repository2\dreambot-client.jar"
+$GSON_JAR   = "$env:USERPROFILE\DreamBot\BotData\repository2\gson-2.10.1.jar"
 $SRC_DIR    = "$PSScriptRoot\src"
 $OUT_DIR    = "$PSScriptRoot\out\classes"
 $JAR_OUT    = "$PSScriptRoot\out\FLLCMasterAIO.jar"
@@ -36,7 +37,7 @@ $procInfo = New-Object System.Diagnostics.ProcessStartInfo
 $procInfo.FileName = $JAVAC
 $listFile = "$env:TEMP\dreambot_sources.txt"
 $javaFiles | Set-Content $listFile -Encoding ASCII
-$procInfo.Arguments = "--release 11 -cp `"$DB_API`" -d `"$OUT_DIR`" `"@$listFile`""
+$procInfo.Arguments = "--release 11 -cp `"$DB_API;$GSON_JAR`" -d `"$OUT_DIR`" `"@$listFile`""
 $procInfo.RedirectStandardOutput = $true
 $procInfo.RedirectStandardError = $true
 $procInfo.UseShellExecute = $false
