@@ -144,13 +144,13 @@ public final class BrutusKillerModule extends SkillModule {
 
     private static boolean shouldEat() {
         int current = Skills.getBoostedLevel(Skill.HITPOINTS);
-        int max     = Skills.getLevel(Skill.HITPOINTS);
+        int max     = Skills.getRealLevel(Skill.HITPOINTS);
         return max > 0 && (current * 100 / max) < EAT_AT_PCT;
     }
 
     private static void eatBestFood() {
         Item food = Inventory.get(i -> i != null && i.getName() != null
-                && (i.getName().contains("beef")
+                && (i.getName().equals("Cooked beef")
                  || i.getName().contains("Trout")
                  || i.getName().contains("Salmon")
                  || i.getName().contains("Pike")
@@ -163,8 +163,8 @@ public final class BrutusKillerModule extends SkillModule {
 
     private static void ensureAttackStyle() {
         try {
-            if (Combat.getFightMode() != CombatStyle.ACCURATE) {
-                Combat.toggleAttackStyle(CombatStyle.ACCURATE);
+            if (Combat.getCombatStyle() != CombatStyle.ATTACK) {
+                Combat.setCombatStyle(CombatStyle.ATTACK);
             }
         } catch (Exception ignored) {
             // Best-effort — some weapon types may not support ACCURATE

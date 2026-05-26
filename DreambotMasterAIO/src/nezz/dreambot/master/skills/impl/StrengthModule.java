@@ -27,8 +27,8 @@ public final class StrengthModule extends SkillModule {
     }
 
     @Override public int tick(String method) {
-        if (Combat.getFightMode() != CombatStyle.AGGRESSIVE) {
-            Combat.toggleAttackStyle(CombatStyle.AGGRESSIVE);
+        if (Combat.getCombatStyle() != CombatStyle.STRENGTH) {
+            Combat.setCombatStyle(CombatStyle.STRENGTH);
         }
         return AttackModule.engageMob(targetName(method));
     }
@@ -42,3 +42,5 @@ public final class StrengthModule extends SkillModule {
         }
     }
 }
+
+

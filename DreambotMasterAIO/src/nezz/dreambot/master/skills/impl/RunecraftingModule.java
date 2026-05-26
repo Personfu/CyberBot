@@ -66,8 +66,8 @@ public final class RunecraftingModule extends SkillModule {
         }
 
         // Phase 2: walk to altar ruin
-        if (altarRuin.distance(Players.localPlayer()) > 8) {
-            Walking.walkTo(altarRuin);
+        if (altarRuin.distance(Players.getLocal()) > 8) {
+            Walking.walk(altarRuin);
             return Calculations.random(1200, 2000);
         }
 
@@ -77,7 +77,7 @@ public final class RunecraftingModule extends SkillModule {
                     && g.getName().equals("Mysterious ruins")
                     && g.hasAction("Enter"));
             if (ruin == null) {
-                Walking.walkTo(altarRuin);
+                Walking.walk(altarRuin);
                 return Calculations.random(800, 1200);
             }
             ruin.interact("Enter");
@@ -104,12 +104,12 @@ public final class RunecraftingModule extends SkillModule {
     }
 
     private int doWithdraw(Tile bankTile) {
-        if (bankTile.distance(Players.localPlayer()) > 10) {
-            Walking.walkTo(bankTile);
+        if (bankTile.distance(Players.getLocal()) > 10) {
+            Walking.walk(bankTile);
             return Calculations.random(1200, 2000);
         }
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
@@ -122,11 +122,11 @@ public final class RunecraftingModule extends SkillModule {
 
     private int doBank(Tile bankTile) {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 4_000);
         }
         if (Bank.isOpen()) {
-            Bank.depositAll();
+            Bank.depositAllItems();
             Bank.withdrawAll("Pure essence");
             if (!Inventory.contains("Pure essence")) Bank.withdrawAll("Rune essence");
             Bank.close();

@@ -62,7 +62,7 @@ public final class CookingModule extends SkillModule {
 
         // 2. Withdraw raw fish from bank
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 4_000);
         }
         if (Bank.isOpen()) {
@@ -82,8 +82,8 @@ public final class CookingModule extends SkillModule {
 
     private int cookInventory(String raw) {
         // Walk to range
-        if (LUM_RANGE.distance(Players.localPlayer()) > 8) {
-            Walking.walkTo(LUM_RANGE);
+        if (LUM_RANGE.distance(Players.getLocal()) > 8) {
+            Walking.walk(LUM_RANGE);
             return Calculations.random(1200, 2000);
         }
 
@@ -92,7 +92,7 @@ public final class CookingModule extends SkillModule {
                     || g.getName().contains("Fire"))
                 && g.hasAction("Cook"));
         if (range == null) {
-            Walking.walkTo(LUM_RANGE);
+            Walking.walk(LUM_RANGE);
             return Calculations.random(800, 1200);
         }
 
@@ -101,12 +101,12 @@ public final class CookingModule extends SkillModule {
 
         fish.useOn(range);
         Sleep.sleepUntil(() ->
-            org.dreambot.api.methods.widget.Widgets.getWidget(COOK_WIDGET_PARENT, COOK_WIDGET_BUTTON) != null,
+            org.dreambot.api.methods.widget.Widgets.get(COOK_WIDGET_PARENT, COOK_WIDGET_BUTTON) != null,
             3_000);
 
         try {
             var cookBtn = org.dreambot.api.methods.widget.Widgets
-                    .getWidget(COOK_WIDGET_PARENT, COOK_WIDGET_BUTTON);
+                    .get(COOK_WIDGET_PARENT, COOK_WIDGET_BUTTON);
             if (cookBtn != null) {
                 cookBtn.interact("Cook");
                 Sleep.sleepUntil(() -> !Inventory.contains(raw), 60_000);
@@ -115,11 +115,11 @@ public final class CookingModule extends SkillModule {
 
         // Bank cooked fish
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
-            Bank.depositAll();
+            Bank.depositAllItems();
             Bank.close();
         }
         return Calculations.random(400, 700);

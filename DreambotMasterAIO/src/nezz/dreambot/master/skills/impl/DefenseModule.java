@@ -26,8 +26,8 @@ public final class DefenseModule extends SkillModule {
     }
 
     @Override public int tick(String method) {
-        if (Combat.getFightMode() != CombatStyle.DEFENSIVE) {
-            Combat.toggleAttackStyle(CombatStyle.DEFENSIVE);
+        if (Combat.getCombatStyle() != CombatStyle.DEFENCE) {
+            Combat.setCombatStyle(CombatStyle.DEFENCE);
         }
         return AttackModule.engageMob(targetName(method));
     }
@@ -41,3 +41,5 @@ public final class DefenseModule extends SkillModule {
         }
     }
 }
+
+

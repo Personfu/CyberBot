@@ -31,9 +31,25 @@ Write-Host "Found $($javaFiles.Count) source files." -ForegroundColor Cyan
 
 # ── Compile (target Java 11 — matches DreamBot's embedded JRE) ────────────
 Write-Host "Compiling..." -ForegroundColor Cyan
-& $JAVAC --release 11 -cp $DB_API -d $OUT_DIR @javaFiles
+$errFile = "$env:TEMP\dreambot_build_errors.txt"
+$procInfo = New-Object System.Diagnostics.ProcessStartInfo
+$procInfo.FileName = $JAVAC
+$listFile = "$env:TEMP\dreambot_sources.txt"
+$javaFiles | Set-Content $listFile -Encoding ASCII
+$procInfo.Arguments = "--release 11 -cp `"$DB_API`" -d `"$OUT_DIR`" `"@$listFile`""
+$procInfo.RedirectStandardOutput = $true
+$procInfo.RedirectStandardError = $true
+$procInfo.UseShellExecute = $false
+$procInfo.CreateNoWindow = $true
+$proc = [System.Diagnostics.Process]::Start($procInfo)
+$stderr = $proc.StandardError.ReadToEnd()
+$stdout = $proc.StandardOutput.ReadToEnd()
+$proc.WaitForExit()
+if ($stdout) { Write-Host "STDOUT: $stdout" }
+$stderr | Where-Object { $_ } | ForEach-Object { Write-Host $_ }
+$buildExitCode = $proc.ExitCode
 
-if ($LASTEXITCODE -ne 0) {
+if ($buildExitCode -ne 0) {
     Write-Host ""
     Write-Host "COMPILATION FAILED. Fix errors above and re-run build.ps1." -ForegroundColor Red
     exit 1

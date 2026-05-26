@@ -40,8 +40,8 @@ public final class RangedModule extends SkillModule {
             Inventory.interact(i -> i != null && i.getName().toLowerCase().contains("bow"), "Wield");
             return Calculations.random(600, 900);
         }
-        if (Combat.getFightMode() != CombatStyle.RAPID) {
-            Combat.toggleAttackStyle(CombatStyle.RAPID);
+        if (Combat.getCombatStyle() != CombatStyle.RANGED_RAPID) {
+            Combat.setCombatStyle(CombatStyle.RANGED_RAPID);
         }
         return engage(targetName(method));
     }
@@ -67,3 +67,5 @@ public final class RangedModule extends SkillModule {
         }
     }
 }
+
+

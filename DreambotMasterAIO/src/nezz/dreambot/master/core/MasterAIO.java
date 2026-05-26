@@ -140,8 +140,7 @@ public class MasterAIO extends AbstractScript {
 
         long totalXp = 0;
         try {
-            Skills sk = Client.getSkills();
-            if (sk != null) for (Skill s : Skill.values()) totalXp += sk.getExperience(s);
+            for (Skill s : Skill.values()) totalXp += Skills.getExperience(s);
         } catch (Throwable ignored) { }
         kv(g2, "Total XP", QuantityFormatter.format(totalXp), x, y); y += rowH;
         kv(g2, "Antiban",  profile.humanMouse ? "ON" : "off", x, y); y += rowH;

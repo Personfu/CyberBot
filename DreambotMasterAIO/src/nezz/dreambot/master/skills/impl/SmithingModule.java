@@ -78,7 +78,7 @@ public final class SmithingModule extends SkillModule {
 
     private int withdrawOres(String ore1, String ore2) {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
@@ -91,24 +91,24 @@ public final class SmithingModule extends SkillModule {
     }
 
     private int smeltAt(Tile furnaceTile, String method) {
-        if (furnaceTile.distance(Players.localPlayer()) > 6) {
-            Walking.walkTo(furnaceTile);
+        if (furnaceTile.distance(Players.getLocal()) > 6) {
+            Walking.walk(furnaceTile);
             return Calculations.random(1200, 2000);
         }
         GameObject furnace = GameObjects.closest(g -> g != null
                 && g.getName().equals("Furnace")
                 && g.hasAction("Smelt"));
         if (furnace == null) {
-            Walking.walkTo(furnaceTile);
+            Walking.walk(furnaceTile);
             return Calculations.random(600, 1000);
         }
         furnace.interact("Smelt");
         Sleep.sleepUntil(() ->
-            org.dreambot.api.methods.widget.Widgets.getWidget(270, 0) != null, 3_500);
+            org.dreambot.api.methods.widget.Widgets.get(270, 0) != null, 3_500);
         // Click the correct bar in the smelting interface
         int childIdx = smeltWidgetChild(method);
         try {
-            var widget = org.dreambot.api.methods.widget.Widgets.getWidget(270, childIdx);
+            var widget = org.dreambot.api.methods.widget.Widgets.get(270, childIdx);
             if (widget != null) {
                 widget.interact("Smelt");
                 Sleep.sleepUntil(() -> !Inventory.contains(ore1For(method)), 30_000);
@@ -119,12 +119,12 @@ public final class SmithingModule extends SkillModule {
 
     private int bankAndQueue(String bar) {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
             int qty = Inventory.count(bar) + Bank.count(bar);
-            Bank.depositAll();
+            Bank.depositAllItems();
             Bank.close();
             // Queue for GE every 200 bars
             if (qty >= 200) {
@@ -178,3 +178,5 @@ public final class SmithingModule extends SkillModule {
         }
     }
 }
+
+

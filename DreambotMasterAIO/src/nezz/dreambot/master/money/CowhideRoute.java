@@ -83,22 +83,22 @@ public final class CowhideRoute extends MoneyRoute {
         }
 
         // Walk to cow field if far
-        if (COW_FIELD.distance(Players.localPlayer()) > 20) {
-            Walking.walkTo(COW_FIELD);
+        if (COW_FIELD.distance(Players.getLocal()) > 20) {
+            Walking.walk(COW_FIELD);
             return Calculations.random(1200, 1800);
         }
 
         // Pick up cowhide on the ground first
         org.dreambot.api.wrappers.items.GroundItem hide =
-            org.dreambot.api.methods.grounditems.GroundItems.closest(COWHIDE);
-        if (hide != null && hide.distance(Players.localPlayer()) < 5) {
+            org.dreambot.api.methods.item.GroundItems.closest(COWHIDE);
+        if (hide != null && hide.distance(Players.getLocal()) < 5) {
             hide.interact("Take");
             Sleep.sleepUntil(() -> Inventory.contains(COWHIDE), 1500);
             return Calculations.random(300, 600);
         }
 
         // Attack the nearest cow
-        if (Combat.getHPPercent() < 20) {
+        if (Combat.getHealthPercent() < 20) {
             // Low HP — eat if we have food; otherwise walk to safe spot briefly
             org.dreambot.api.wrappers.items.Item food =
                 Inventory.get(i -> i != null && i.hasAction("Eat"));
@@ -111,23 +111,23 @@ public final class CowhideRoute extends MoneyRoute {
                 && !n.isInCombat());
         if (cow == null) {
             // Hop world if all cows contested
-            Walking.walkTo(COW_FIELD);
+            Walking.walk(COW_FIELD);
             return Calculations.random(1000, 1500);
         }
-        if (!cow.isInCombat() || cow.isInteractingWithMe()) {
+        if (!cow.isInCombat() || cow.isInteractedWith()) {
             cow.interact("Attack");
-            Sleep.sleepUntil(() -> Players.localPlayer().isAnimating(), 2000);
+            Sleep.sleepUntil(() -> Players.getLocal().isAnimating(), 2000);
         }
         return Calculations.random(600, 1200);
     }
 
     private int doBanking() {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3000);
         }
         if (Bank.isOpen()) {
-            Bank.depositAll();
+            Bank.depositAllItems();
             bankedHides += Inventory.count(COWHIDE);
             Sleep.sleepUntil(() -> !Inventory.contains(COWHIDE), 1500);
             Bank.close();
@@ -143,13 +143,13 @@ public final class CowhideRoute extends MoneyRoute {
 
     private int doTanning() {
         // Walk to Ellis the tanner in Al-Kharid
-        if (TANNER_TILE.distance(Players.localPlayer()) > 5) {
-            Walking.walkTo(TANNER_TILE);
+        if (TANNER_TILE.distance(Players.getLocal()) > 5) {
+            Walking.walk(TANNER_TILE);
             return Calculations.random(1200, 1800);
         }
         // Withdraw cowhides from bank (use Al-Kharid bank)
         if (!Inventory.contains(COWHIDE)) {
-            Bank.openClosest();
+            Bank.open();
             if (Bank.isOpen()) {
                 Bank.withdrawAll(COWHIDE);
                 Bank.close();
@@ -161,10 +161,10 @@ public final class CowhideRoute extends MoneyRoute {
         if (ellis != null) {
             ellis.interact("Trade");
             Sleep.sleepUntil(() ->
-                org.dreambot.api.methods.widget.Widgets.getWidget(324, 0) != null, 3000);
+                org.dreambot.api.methods.widget.Widgets.get(324, 0) != null, 3000);
             // Click "Tan All" → hard leather (interface child depends on client version)
             try {
-                org.dreambot.api.methods.widget.Widgets.getWidget(324, 14).interact("Tan");
+                org.dreambot.api.methods.widget.Widgets.get(324, 14).interact("Tan");
                 Sleep.sleepUntil(() -> !Inventory.contains(COWHIDE), 10_000);
             } catch (Throwable ignored) { }
         }
@@ -182,3 +182,5 @@ public final class CowhideRoute extends MoneyRoute {
 
     public void enableTanning(boolean on) { this.tanningMode = on; }
 }
+
+

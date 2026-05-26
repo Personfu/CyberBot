@@ -71,7 +71,7 @@ public final class AirRuneRoute extends MoneyRoute {
             return 300;
         }
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
@@ -86,11 +86,11 @@ public final class AirRuneRoute extends MoneyRoute {
     }
 
     private int doWalkToAltar() {
-        if (AIR_ALTAR_ENTER.distance(Players.localPlayer()) < 8) {
+        if (AIR_ALTAR_ENTER.distance(Players.getLocal()) < 8) {
             state = State.ENTER_ALTAR;
             return 300;
         }
-        Walking.walkTo(AIR_ALTAR_ENTER);
+        Walking.walk(AIR_ALTAR_ENTER);
         return Calculations.random(1200, 2000);
     }
 
@@ -99,7 +99,7 @@ public final class AirRuneRoute extends MoneyRoute {
                 && g.getName().equals(AIR_RUIN)
                 && g.hasAction("Enter"));
         if (ruin == null) {
-            Walking.walkTo(AIR_ALTAR_ENTER);
+            Walking.walk(AIR_ALTAR_ENTER);
             return Calculations.random(800, 1200);
         }
         ruin.interact("Enter");
@@ -129,12 +129,12 @@ public final class AirRuneRoute extends MoneyRoute {
 
     private int doBank() {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 4_000);
         }
         if (Bank.isOpen()) {
             bankedRunes += Inventory.count("Air rune");
-            Bank.depositAll();
+            Bank.depositAllItems();
             Sleep.sleepUntil(Inventory::isEmpty, 2_000);
             Bank.close();
             state = bankedRunes >= BATCH_RUNES ? State.SELLING : State.WITHDRAW;

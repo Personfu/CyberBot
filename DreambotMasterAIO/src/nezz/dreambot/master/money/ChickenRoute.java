@@ -5,7 +5,7 @@ import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.combat.Combat;
 import org.dreambot.api.methods.container.impl.Inventory;
 import org.dreambot.api.methods.container.impl.bank.Bank;
-import org.dreambot.api.methods.grounditems.GroundItems;
+import org.dreambot.api.methods.item.GroundItems;
 import org.dreambot.api.methods.interactive.NPCs;
 import org.dreambot.api.methods.interactive.Players;
 import org.dreambot.api.methods.map.Tile;
@@ -81,14 +81,14 @@ public final class ChickenRoute extends MoneyRoute {
         }
 
         // Walk to chicken pen
-        if (CHICKEN_TILE.distance(Players.localPlayer()) > 15) {
-            Walking.walkTo(CHICKEN_TILE);
+        if (CHICKEN_TILE.distance(Players.getLocal()) > 15) {
+            Walking.walk(CHICKEN_TILE);
             return Calculations.random(1200, 1800);
         }
 
         // Grab feathers from ground first
         GroundItem feathers = GroundItems.closest("Feather");
-        if (feathers != null && feathers.distance(Players.localPlayer()) < 5) {
+        if (feathers != null && feathers.distance(Players.getLocal()) < 5) {
             feathers.interact("Take");
             Sleep.sleep(Calculations.random(300, 500));
             return Calculations.random(200, 400);
@@ -96,7 +96,7 @@ public final class ChickenRoute extends MoneyRoute {
 
         // Grab raw chicken
         GroundItem rawChicken = GroundItems.closest("Raw chicken");
-        if (rawChicken != null && rawChicken.distance(Players.localPlayer()) < 4) {
+        if (rawChicken != null && rawChicken.distance(Players.getLocal()) < 4) {
             rawChicken.interact("Take");
             Sleep.sleep(Calculations.random(300, 500));
             return Calculations.random(200, 400);
@@ -107,19 +107,19 @@ public final class ChickenRoute extends MoneyRoute {
                 && !n.isInCombat());
         if (chicken != null) {
             chicken.interact("Attack");
-            Sleep.sleepUntil(() -> Players.localPlayer().isAnimating(), 2000);
+            Sleep.sleepUntil(() -> Players.getLocal().isAnimating(), 2000);
         }
         return Calculations.random(600, 1200);
     }
 
     private int doBank() {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
             feathersCollected += Inventory.count("Feather");
-            Bank.depositAll();
+            Bank.depositAllItems();
             Sleep.sleepUntil(() -> Inventory.isEmpty(), 2_000);
             Bank.close();
             state = feathersCollected >= BATCH_SIZE ? State.SELLING : State.KILLING;
@@ -136,3 +136,4 @@ public final class ChickenRoute extends MoneyRoute {
         return 300;
     }
 }
+

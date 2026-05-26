@@ -47,7 +47,7 @@ public final class ThievingModule extends SkillModule {
 
     @Override public int tick(String method) {
         // Eat if stunned / low HP
-        if (Combat.getHPPercent() < 40) {
+        if (Combat.getHealthPercent() < 40) {
             var food = Inventory.get(i -> i != null && i.hasAction("Eat"));
             if (food != null) food.interact("Eat");
             return Calculations.random(600, 1000);
@@ -56,8 +56,8 @@ public final class ThievingModule extends SkillModule {
         String npcName = npcFor(method);
         Tile area      = areaFor(method);
 
-        if (area.distance(Players.localPlayer()) > 20) {
-            Walking.walkTo(area);
+        if (area.distance(Players.getLocal()) > 20) {
+            Walking.walk(area);
             return Calculations.random(1200, 2000);
         }
 
@@ -66,12 +66,12 @@ public final class ThievingModule extends SkillModule {
                 && n.hasAction("Pickpocket")
                 && !n.isInCombat());
         if (target == null) {
-            Walking.walkTo(area);
+            Walking.walk(area);
             return Calculations.random(600, 1000);
         }
 
         target.interact("Pickpocket");
-        Sleep.sleepUntil(() -> Players.localPlayer().isAnimating()
+        Sleep.sleepUntil(() -> Players.getLocal().isAnimating()
                 || Inventory.count("Coins") > 0, 1_500);
         return Calculations.random(400, 700);
     }

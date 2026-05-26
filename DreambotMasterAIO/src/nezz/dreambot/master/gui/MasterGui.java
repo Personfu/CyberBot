@@ -24,6 +24,7 @@ import java.nio.file.Paths;
  * <p>Visual style matches the existing FLLC All-In-One GUI: dark background,
  * yellow header, simple sectioning. No external L&F dependency.</p>
  */
+@SuppressWarnings("serial")
 public final class MasterGui extends JFrame {
 
     private static final Color BG  = new Color(15, 18, 22);

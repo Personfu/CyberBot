@@ -42,6 +42,7 @@ public final class HumanMouse implements MouseAlgorithm {
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public boolean handleMovement(AbstractMouseDestination destination) {
         Point start = Mouse.getPosition();
         Point end   = destination.getSuitablePoint();
@@ -90,7 +91,7 @@ public final class HumanMouse implements MouseAlgorithm {
     }
 
     @Override
-    public boolean handleClick(int button) {
+    public boolean handleClick(org.dreambot.api.input.event.impl.mouse.MouseButton button) {
         // Defer to DreamBot's default click handling.
         return false;
     }
@@ -124,3 +125,5 @@ public final class HumanMouse implements MouseAlgorithm {
         try { Thread.sleep(ms); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
     }
 }
+
+

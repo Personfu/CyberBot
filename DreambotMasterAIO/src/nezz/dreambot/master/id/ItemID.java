@@ -192,4 +192,11 @@ public final class ItemID {
     public static final int LETTER                = 1602;
     public static final int CANDLE                = 36;
     public static final int CANDLE_BLACK          = 38;
+
+    // ── Crafting / spinning ─────────────────────────────────────────────────
+    public static final int FLAX                  = 1779;
+    public static final int BOWSTRING             = 1777;
+    public static final int COWHIDE               = 1739;
+    public static final int SOFT_LEATHER          = 1741;
+    public static final int HARD_LEATHER          = 1743;
 }

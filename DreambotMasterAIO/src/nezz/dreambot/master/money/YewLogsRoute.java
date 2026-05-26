@@ -70,8 +70,8 @@ public final class YewLogsRoute extends MoneyRoute {
         }
 
         // Navigate to yew area if far
-        if (Players.localPlayer().distance(YEW_SPOT_1) > 25) {
-            Walking.walkTo(YEW_SPOT_1);
+        if (Players.getLocal().distance(YEW_SPOT_1) > 25) {
+            Walking.walk(YEW_SPOT_1);
             return Calculations.random(1200, 2000);
         }
 
@@ -79,28 +79,28 @@ public final class YewLogsRoute extends MoneyRoute {
         GameObject yew = GameObjects.closest(g -> g != null
                 && g.getName().equals("Yew")
                 && g.hasAction("Chop down")
-                && (g.distance(Players.localPlayer()) < 15));
+                && (g.distance(Players.getLocal()) < 15));
         if (yew == null) {
             // All yews busy — try backup location
-            Walking.walkTo(LUM_YEW_1);
+            Walking.walk(LUM_YEW_1);
             return Calculations.random(2000, 3000);
         }
 
-        if (!Players.localPlayer().isAnimating()) {
+        if (!Players.getLocal().isAnimating()) {
             yew.interact("Chop down");
-            Sleep.sleepUntil(() -> Players.localPlayer().isAnimating(), 3_000);
+            Sleep.sleepUntil(() -> Players.getLocal().isAnimating(), 3_000);
         }
         return Calculations.random(1800, 4000);
     }
 
     private int doBank() {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 4_000);
         }
         if (Bank.isOpen()) {
             bankedLogs += Inventory.count("Yew logs");
-            Bank.depositAll();
+            Bank.depositAllItems();
             Sleep.sleepUntil(() -> Inventory.isEmpty(), 2_000);
             Bank.close();
             state = bankedLogs >= BATCH_SIZE ? State.SELLING : State.CHOPPING;

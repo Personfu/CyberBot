@@ -83,9 +83,9 @@ public final class CraftingModule extends SkillModule {
 
         // Wait for make-x interface and confirm
         Sleep.sleepUntil(() ->
-            org.dreambot.api.methods.widget.Widgets.getWidget(270, 0) != null, 2_500);
+            org.dreambot.api.methods.widget.Widgets.get(270, 0) != null, 2_500);
         try {
-            var btn = org.dreambot.api.methods.widget.Widgets.getWidget(270, 14);
+            var btn = org.dreambot.api.methods.widget.Widgets.get(270, 14);
             if (btn != null) {
                 btn.interact("Make");
                 Sleep.sleepUntil(() -> !Inventory.contains(mat1), 30_000);
@@ -94,11 +94,11 @@ public final class CraftingModule extends SkillModule {
 
         // Deposit
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
-            Bank.depositAll();
+            Bank.depositAllItems();
             Bank.close();
         }
         return Calculations.random(400, 700);
@@ -106,11 +106,11 @@ public final class CraftingModule extends SkillModule {
 
     private int withdrawMats(String mat1, String mat2, String tool) {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
-            Bank.depositAll();
+            Bank.depositAllItems();
             if (tool != null) Bank.withdraw(tool, 1);
             // Withdraw correct proportions
             if (mat2 != null) {
@@ -168,3 +168,4 @@ public final class CraftingModule extends SkillModule {
         }
     }
 }
+

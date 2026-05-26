@@ -2,7 +2,7 @@ package nezz.dreambot.master.antiban;
 
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.world.Worlds;
-import org.dreambot.api.wrappers.online.World;
+import org.dreambot.api.methods.world.World;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,17 +39,17 @@ public final class WorldHopper {
             List<World> candidates = Worlds.all().stream()
                 .filter(w -> w != null
                     && !w.isMembers()
-                    && !w.isPvP()
-                    && !w.isDeadman()
+                    && !w.isPVP()
+                    && !w.isDeadmanMode()
                     && !w.isHighRisk()
-                    && w.getPlayerCount() < 1_200
-                    && (current == null || w.getID() != current.getID()))
+                    && w.getPopulation() < 1_200
+                    && (current == null || w.getRealId() != current.getRealId()))
                 .collect(Collectors.toList());
 
             if (candidates.isEmpty()) return false;
 
             World target = candidates.get(Calculations.random(0, candidates.size() - 1));
-            Worlds.hopTo(target);
+            org.dreambot.api.methods.worldhopper.WorldHopper.hopWorld(target.getRealId());
             scheduleNext();
             return true;
         } catch (Throwable ignored) {
@@ -63,3 +63,5 @@ public final class WorldHopper {
                 + Calculations.random(MIN_HOP_MS, MAX_HOP_MS);
     }
 }
+
+

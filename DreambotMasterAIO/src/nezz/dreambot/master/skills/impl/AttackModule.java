@@ -35,8 +35,8 @@ public final class AttackModule extends SkillModule {
     }
 
     @Override public int tick(String method) {
-        if (Combat.getFightMode() != CombatStyle.ACCURATE) {
-            Combat.toggleAttackStyle(CombatStyle.ACCURATE);
+        if (Combat.getCombatStyle() != CombatStyle.ATTACK) {
+            Combat.setCombatStyle(CombatStyle.ATTACK);
         }
         return engageMob(targetName(method));
     }

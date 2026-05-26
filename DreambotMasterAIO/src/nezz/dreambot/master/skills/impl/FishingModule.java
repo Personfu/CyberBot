@@ -42,7 +42,7 @@ public final class FishingModule extends SkillModule {
                 Inventory.dropAll(it -> it != null && it.getName().toLowerCase().contains("raw "));
                 return Calculations.random(600, 1000);
             }
-            Walking.walkToBank();
+            Walking.walk(org.dreambot.api.methods.container.impl.bank.BankLocation.getNearest().getCenter());
             return Calculations.random(1200, 1800);
         }
         String action = actionFor(method);
@@ -63,3 +63,4 @@ public final class FishingModule extends SkillModule {
         }
     }
 }
+

@@ -31,7 +31,7 @@ import org.dreambot.api.utilities.Sleep;
 import org.dreambot.api.wrappers.interactive.GameObject;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.items.Item;
-import org.dreambot.api.wrappers.widgets.Widget;
+import org.dreambot.api.methods.widget.Widget;
 import org.dreambot.api.wrappers.widgets.WidgetChild;
 
 import java.awt.Rectangle;
@@ -193,7 +193,7 @@ public final class TutorialTask extends Task {
 
     private void talkTo(int npcId, String name) {
         if (!Dialogues.canContinue()) {
-            NPC g = NPCs.closest(n -> n != null && (n.getID() == npcId
+            NPC g = NPCs.closest(n -> n != null && (n.getId() == npcId
                     || name.equalsIgnoreCase(n.getName())));
             if (g != null) {
                 if (g.isOnScreen()) {
@@ -311,8 +311,7 @@ public final class TutorialTask extends Task {
 
     private void doEmote() {
         Rectangle r = new Rectangle(560, 213, 20, 40);
-        Mouse.move(r);
-        Mouse.click();
+        Mouse.click(r);
         Sleep.sleepUntil(() -> PlayerSettings.getConfig(Varbits.TUTORIAL_PROGRESS) != 187, 5000);
     }
 
@@ -574,7 +573,7 @@ public final class TutorialTask extends Task {
     // ── helpers ──────────────────────────────────────────────────────────────
 
     private void eatClickToContinue() {
-        List<WidgetChild> ctc = Widgets.getWidgetChildrenContainingText("Click to continue");
+        List<WidgetChild> ctc = Widgets.getAllContainingText("Click to continue");
         if (!ctc.isEmpty()) {
             WidgetChild wc = ctc.get(0);
             if (wc != null && wc.isVisible()) {
@@ -606,3 +605,6 @@ public final class TutorialTask extends Task {
         try { Thread.sleep(Calculations.random(min, max)); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
     }
 }
+
+
+

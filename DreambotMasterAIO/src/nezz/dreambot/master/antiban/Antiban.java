@@ -164,7 +164,7 @@ public final class Antiban {
             int scrolls = Calculations.random(2, 5);
             boolean in = Math.random() < 0.5;
             for (int i = 0; i < scrolls; i++) {
-                Mouse.scroll(in);
+                Mouse.scroll(in, 1, () -> true);
                 sleepNoExc(Calculations.random(60, 120));
             }
         }
@@ -237,8 +237,8 @@ public final class Antiban {
     private void hoverNearbyEntity() {
         try {
             NPC npc = NPCs.closest(n -> n != null && n.isOnScreen()
-                    && Players.localPlayer() != null
-                    && n.distance(Players.localPlayer()) < 8);
+                    && Players.getLocal() != null
+                    && n.distance(Players.getLocal()) < 8);
             if (npc != null) {
                 Mouse.move(npc.getClickablePoint());
                 log.trace("antiban: hover npc=" + npc.getName());
@@ -258,8 +258,8 @@ public final class Antiban {
             }
             // Fall back to nearest game object
             GameObject obj = GameObjects.closest(g -> g != null && g.isOnScreen()
-                    && Players.localPlayer() != null
-                    && g.distance(Players.localPlayer()) < 6);
+                    && Players.getLocal() != null
+                    && g.distance(Players.getLocal()) < 6);
             if (obj != null) {
                 Mouse.move(obj.getClickablePoint());
                 sleepNoExc(Calculations.random(200, 700));

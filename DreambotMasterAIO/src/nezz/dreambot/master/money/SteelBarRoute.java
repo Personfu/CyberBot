@@ -71,35 +71,35 @@ public final class SteelBarRoute extends MoneyRoute {
             state = next;
             return 300;
         }
-        if (mineArea.distance(Players.localPlayer()) > 10) {
-            Walking.walkTo(mineArea);
+        if (mineArea.distance(Players.getLocal()) > 10) {
+            Walking.walk(mineArea);
             return Calculations.random(1200, 1800);
         }
         GameObject rock = GameObjects.closest(g -> g != null
                 && g.getName().equals(rockName)
                 && g.hasAction("Mine"));
         if (rock == null) {
-            Walking.walkTo(mineArea);
+            Walking.walk(mineArea);
             return Calculations.random(600, 1000);
         }
-        if (!Players.localPlayer().isAnimating()) {
+        if (!Players.getLocal().isAnimating()) {
             rock.interact("Mine");
-            Sleep.sleepUntil(() -> Players.localPlayer().isAnimating(), 2_000);
+            Sleep.sleepUntil(() -> Players.getLocal().isAnimating(), 2_000);
         }
         return Calculations.random(1200, 2200);
     }
 
     private int doSmelt() {
         // Walk to furnace
-        if (FURNACE.distance(Players.localPlayer()) > 5) {
-            Walking.walkTo(FURNACE);
+        if (FURNACE.distance(Players.getLocal()) > 5) {
+            Walking.walk(FURNACE);
             return Calculations.random(1200, 1800);
         }
         GameObject furnace = GameObjects.closest(g -> g != null
                 && g.getName().equals("Furnace")
                 && g.hasAction("Smelt"));
         if (furnace == null) {
-            Walking.walkTo(FURNACE);
+            Walking.walk(FURNACE);
             return Calculations.random(600, 1000);
         }
         if (!Inventory.contains("Iron ore") || !Inventory.contains("Coal")) {
@@ -109,10 +109,10 @@ public final class SteelBarRoute extends MoneyRoute {
         furnace.interact("Smelt");
         // Wait for smelting interface (widget 270 for smithing in DB)
         Sleep.sleepUntil(() ->
-            org.dreambot.api.methods.widget.Widgets.getWidget(270, 0) != null, 3_000);
+            org.dreambot.api.methods.widget.Widgets.get(270, 0) != null, 3_000);
         try {
             // Click steel bar icon — child index 4 in standard smelting interface
-            org.dreambot.api.methods.widget.Widgets.getWidget(270, 4).interact("Smelt");
+            org.dreambot.api.methods.widget.Widgets.get(270, 4).interact("Smelt");
             Sleep.sleepUntil(() -> !Inventory.contains("Iron ore"), 30_000);
         } catch (Throwable ignored) { }
         state = State.BANKING;
@@ -121,12 +121,12 @@ public final class SteelBarRoute extends MoneyRoute {
 
     private int doBank() {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
             bankedBars += Inventory.count("Steel bar");
-            Bank.depositAll();
+            Bank.depositAllItems();
             Sleep.sleepUntil(Inventory::isEmpty, 2_000);
             Bank.close();
             state = bankedBars >= BATCH_BARS ? State.SELLING : State.MINE_IRON;
@@ -141,3 +141,4 @@ public final class SteelBarRoute extends MoneyRoute {
         return 300;
     }
 }
+

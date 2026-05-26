@@ -38,9 +38,7 @@ public final class SkillTask extends Task {
     @Override public boolean isComplete() { return done; }
 
     @Override public int execute() {
-        Skills s = Client.getSkills();
-        if (s == null) return 600;
-        int current = s.getRealLevel(module.skill());
+        int current = Skills.getRealLevel(module.skill());
         if (current != lastLogged) {
             log.info("[" + module.name() + "] level " + current + " / " + targetLevel);
             lastLogged = current;

@@ -67,7 +67,7 @@ public final class FlaxSpinRoute extends MoneyRoute {
 
     private int doBuyFlax() {
         // Check if we already have flax banked
-        Bank.openClosest();
+        Bank.open();
         if (Bank.isOpen()) {
             int inBank = Bank.count("Flax");
             if (inBank >= 28) {
@@ -90,9 +90,9 @@ public final class FlaxSpinRoute extends MoneyRoute {
             boughtFlax += FLAX_BUY_QTY;
         }
         // Bank the flax and transition
-        Bank.openClosest();
+        Bank.open();
         if (Bank.isOpen()) {
-            Bank.depositAll();
+            Bank.depositAllItems();
             Bank.close();
         }
         state = State.WITHDRAW_FLAX;
@@ -101,7 +101,7 @@ public final class FlaxSpinRoute extends MoneyRoute {
 
     private int doWithdraw() {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
@@ -122,8 +122,8 @@ public final class FlaxSpinRoute extends MoneyRoute {
         }
 
         // Navigate to spinning wheel
-        if (SPINNING_WHEEL.distance(Players.localPlayer()) > 5) {
-            Walking.walkTo(SPINNING_WHEEL);
+        if (SPINNING_WHEEL.distance(Players.getLocal()) > 5) {
+            Walking.walk(SPINNING_WHEEL);
             return Calculations.random(1200, 2000);
         }
 
@@ -131,7 +131,7 @@ public final class FlaxSpinRoute extends MoneyRoute {
                 && g.getName().equals("Spinning wheel")
                 && g.hasAction("Spin"));
         if (wheel == null) {
-            Walking.walkTo(SPINNING_WHEEL);
+            Walking.walk(SPINNING_WHEEL);
             return Calculations.random(800, 1200);
         }
 
@@ -140,9 +140,9 @@ public final class FlaxSpinRoute extends MoneyRoute {
             flax.useOn(wheel);
             // Wait for "Make All" widget (interface 459 child 5 in modern clients)
             Sleep.sleepUntil(() ->
-                org.dreambot.api.methods.widget.Widgets.getWidget(459, 5) != null, 2_500);
+                org.dreambot.api.methods.widget.Widgets.get(459, 5) != null, 2_500);
             try {
-                org.dreambot.api.methods.widget.Widgets.getWidget(459, 5).interact("Make");
+                org.dreambot.api.methods.widget.Widgets.get(459, 5).interact("Make");
                 Sleep.sleepUntil(() -> !Inventory.contains("Flax"), 60_000);
             } catch (Throwable ignored) { }
         }
@@ -153,12 +153,12 @@ public final class FlaxSpinRoute extends MoneyRoute {
 
     private int doBank() {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
             int strings = Inventory.count("Bow string");
-            Bank.depositAll();
+            Bank.depositAllItems();
             Sleep.sleepUntil(Inventory::isEmpty, 2_000);
             Bank.close();
             int totalStrings = Bank.count("Bow string");
@@ -177,3 +177,4 @@ public final class FlaxSpinRoute extends MoneyRoute {
         return 300;
     }
 }
+

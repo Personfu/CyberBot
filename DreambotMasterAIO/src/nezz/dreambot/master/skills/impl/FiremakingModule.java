@@ -68,18 +68,18 @@ public final class FiremakingModule extends SkillModule {
         if (tinderbox == null || log == null) return 300;
 
         tinderbox.useOn(log);
-        Sleep.sleepUntil(() -> Players.localPlayer().isAnimating(), 2_000);
-        Sleep.sleepUntil(() -> !Players.localPlayer().isAnimating(), 8_000);
+        Sleep.sleepUntil(() -> Players.getLocal().isAnimating(), 2_000);
+        Sleep.sleepUntil(() -> !Players.getLocal().isAnimating(), 8_000);
         return Calculations.random(300, 600);
     }
 
     private void withdrawLogsAndBox(String logName) {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
-            Bank.depositAll();
+            Bank.depositAllItems();
             Bank.withdraw("Tinderbox", 1);
             Bank.withdraw(logName, 27);
             Sleep.sleepUntil(() -> Inventory.contains(logName), 2_000);

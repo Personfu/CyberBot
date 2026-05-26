@@ -59,7 +59,7 @@ public final class MiningModule extends SkillModule {
 
     private int mineToBank(String oreName) {
         if (Inventory.isFull()) {
-            Walking.walkToBank();
+            Walking.walk(org.dreambot.api.methods.container.impl.bank.BankLocation.getNearest().getCenter());
             return Calculations.random(1200, 1800);
         }
         return mineThenDrop(oreName);
@@ -71,3 +71,4 @@ public final class MiningModule extends SkillModule {
         return mineToBank("Coal");
     }
 }
+

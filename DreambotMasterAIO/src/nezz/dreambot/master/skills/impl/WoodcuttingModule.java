@@ -45,7 +45,7 @@ public final class WoodcuttingModule extends SkillModule {
                 Inventory.dropAll(it -> it != null && it.getName().toLowerCase().contains("logs"));
                 return Calculations.random(600, 1000);
             }
-            Walking.walkToBank();
+            Walking.walk(org.dreambot.api.methods.container.impl.bank.BankLocation.getNearest().getCenter());
             return Calculations.random(1200, 1800);
         }
         String want = mapToObjectName(wanted);
@@ -68,3 +68,4 @@ public final class WoodcuttingModule extends SkillModule {
         }
     }
 }
+

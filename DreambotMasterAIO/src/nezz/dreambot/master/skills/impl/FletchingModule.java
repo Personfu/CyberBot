@@ -76,9 +76,9 @@ public final class FletchingModule extends SkillModule {
 
         // Wait for interface + click "Make All"
         Sleep.sleepUntil(() ->
-            org.dreambot.api.methods.widget.Widgets.getWidget(270, 0) != null, 2_500);
+            org.dreambot.api.methods.widget.Widgets.get(270, 0) != null, 2_500);
         try {
-            var btn = org.dreambot.api.methods.widget.Widgets.getWidget(270, 14);
+            var btn = org.dreambot.api.methods.widget.Widgets.get(270, 14);
             if (btn != null) {
                 btn.interact("Make");
                 Sleep.sleepUntil(() -> !Inventory.contains(primary), 30_000);
@@ -87,11 +87,11 @@ public final class FletchingModule extends SkillModule {
 
         // Bank finished items
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
-            Bank.depositAll();
+            Bank.depositAllItems();
             if (!Inventory.contains("Knife")) Bank.withdraw("Knife", 1);
             Bank.close();
         }
@@ -100,11 +100,11 @@ public final class FletchingModule extends SkillModule {
 
     private int withdraw(String primary, String secondary) {
         if (!Bank.isOpen()) {
-            Bank.openClosest();
+            Bank.open();
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
-            Bank.depositAll();
+            Bank.depositAllItems();
             if (!Inventory.contains("Knife")) Bank.withdraw("Knife", 1);
             int slots = secondary != null ? 13 : 27;
             Bank.withdraw(primary, slots);
@@ -148,3 +148,4 @@ public final class FletchingModule extends SkillModule {
         return "Make";
     }
 }
+

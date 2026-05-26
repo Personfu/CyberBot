@@ -45,7 +45,7 @@ public final class GESellTask extends Task {
     public static void clearQueue() { SELL_QUEUE.clear(); }
 
     @Override public int  priority()  { return 60; }
-    @Override public BotState state() { return BotState.SELLING; }
+    @Override public BotState state() { return BotState.MONEY_MAKING; }
     @Override public boolean isComplete() { return done; }
 
     @Override public boolean isReady() {
@@ -67,9 +67,9 @@ public final class GESellTask extends Task {
         }
 
         // Then bank everything we just collected
-        Bank.openClosest();
+        Bank.open();
         if (Bank.isOpen()) {
-            Bank.depositAll();
+            Bank.depositAllItems();
             Bank.close();
         }
 
@@ -91,3 +91,4 @@ public final class GESellTask extends Task {
 
     @Override public String label() { return "GE-sell[" + SELL_QUEUE.size() + " items queued]"; }
 }
+
