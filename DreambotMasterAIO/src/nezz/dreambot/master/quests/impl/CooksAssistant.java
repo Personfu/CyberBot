@@ -10,16 +10,16 @@ import org.dreambot.api.methods.settings.PlayerSettings;
  * Cook's Assistant — easy F2P starter quest. Speak to the Lumbridge Cook,
  * gather an egg, flour and a bucket of milk, return.
  *
- * <p>Varbit {@link Varbits#QUEST_COOKS_ASSISTANT} = 29 tracks progress.
+ * <p>VarPlayer {@link Varbits#QUEST_COOKS_ASSISTANT} = 29 tracks progress.
  * Stages: 0=not started, 1=talked, 2=complete.</p>
  */
 public final class CooksAssistant extends Quest {
 
     public CooksAssistant() {
         steps.put(0, QuestStep.talkTo("Cook",
-                () -> PlayerSettings.getBitValue(Varbits.QUEST_COOKS_ASSISTANT) > 0));
+                () -> PlayerSettings.getConfig(Varbits.QUEST_COOKS_ASSISTANT) > 0));
         steps.put(1, QuestStep.useItemOnNpc("Bucket of milk", "Cook",
-                () -> haveAll() && PlayerSettings.getBitValue(Varbits.QUEST_COOKS_ASSISTANT) >= 2));
+                () -> haveAll() && PlayerSettings.getConfig(Varbits.QUEST_COOKS_ASSISTANT) >= 2));
         steps.put(2, QuestStep.noop("complete"));
     }
 
@@ -30,6 +30,6 @@ public final class CooksAssistant extends Quest {
     }
 
     @Override public String name() { return "Cook's Assistant"; }
-    @Override public int stageVarbit() { return Varbits.QUEST_COOKS_ASSISTANT; }
+    @Override public int stageVarp() { return Varbits.QUEST_COOKS_ASSISTANT; }
     @Override public int completeStage() { return 2; }
 }

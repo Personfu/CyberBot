@@ -71,6 +71,8 @@ public final class BuildPlan {
         p.add(new Phase(PhaseType.QUEST, "Restless Ghost",      0)); //  1 QP (Prayer XP)
         p.add(new Phase(PhaseType.QUEST, "Witch's Potion",      0)); //  1 QP
         p.add(new Phase(PhaseType.QUEST, "Imp Catcher",         0)); //  1 QP (Magic XP)
+        p.add(new Phase(PhaseType.QUEST, "Ides of Milk",        0)); //  1 QP (unlock Brutus)
+        p.add(new Phase(PhaseType.QUEST, "Below Ice Mountain",  0)); //  1 QP (Camdozaal access)
         p.add(new Phase(PhaseType.QUEST, "Romeo and Juliet",    0)); //  5 QP
         p.add(new Phase(PhaseType.QUEST, "Ernest the Chicken",  0)); //  4 QP
         p.add(new Phase(PhaseType.QUEST, "Goblin Diplomacy",    0)); //  5 QP
@@ -81,10 +83,12 @@ public final class BuildPlan {
         // ── 2. Early money: chickens → bank feathers → sell ───────────────
         p.add(new Phase(PhaseType.MONEY_MAKING, "ChickenRoute", 10_000).opt("gpTarget", 10_000));
 
-        // ── 3. Combat base levels (fast with quest XP) ────────────────────
-        p.add(new Phase(PhaseType.SKILL_LEVEL, "Attack",     20));
-        p.add(new Phase(PhaseType.SKILL_LEVEL, "Strength",   20));
-        p.add(new Phase(PhaseType.SKILL_LEVEL, "Defense",    20));
+        // ── 3. Brutus combat training (fast, free food, cowhide money) ───────
+        // Brutus unlocked by Ides of Milk quest above. Regular cows as fallback.
+        p.add(new Phase(PhaseType.SKILL_LEVEL, "Brutus", 20));  // gets Attack to ~20 via Brutus
+        p.add(new Phase(PhaseType.SKILL_LEVEL, "Attack",   20));
+        p.add(new Phase(PhaseType.SKILL_LEVEL, "Strength", 20));
+        p.add(new Phase(PhaseType.SKILL_LEVEL, "Defense",  20));
 
         // ── 4. Doric's Quest (free pickaxe + Mining XP) ───────────────────
         p.add(new Phase(PhaseType.QUEST, "Doric's Quest",    0)); //  1 QP
@@ -105,6 +109,8 @@ public final class BuildPlan {
         p.add(new Phase(PhaseType.MONEY_MAKING, "FlaxSpinRoute", 200_000).opt("gpTarget", 200_000));
 
         // ── 9. Build combat to wear rune armour + fight Elvarg ────────────
+        // Use Brutus for efficient F2P combat XP + cowhide money
+        p.add(new Phase(PhaseType.SKILL_LEVEL, "Brutus",  40));  // Brutus trains all combat
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Attack",     40));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Strength",   40));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Defense",    40));
@@ -160,12 +166,14 @@ public final class BuildPlan {
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Thieving",     40));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Thieving",     99));
 
-        // Combat to 99
+        // Combat to 99 — use Brutus for efficient F2P training
+        p.add(new Phase(PhaseType.SKILL_LEVEL, "Brutus",   70));  // grind Brutus to 70 combat
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Attack",       70));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Strength",     70));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Defense",      70));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Ranged",       70));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Magic",        70));
+        p.add(new Phase(PhaseType.SKILL_LEVEL, "Brutus",   99));  // final Brutus grind
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Attack",       99));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Strength",     99));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Defense",      99));

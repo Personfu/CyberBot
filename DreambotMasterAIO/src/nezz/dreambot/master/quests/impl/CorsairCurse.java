@@ -10,7 +10,7 @@ import org.dreambot.api.methods.settings.PlayerSettings;
  * curse affecting Port Sarim and Corsair Cove.
  *
  * Reward: 1,000 XP lamp (any skill 30+), 2 QP, 1,500 gp.
- * VarPlayer 367: 0=not started, 1-5=stages, 6=complete
+ * VarBit 5941: 0=not started, 1-5=stages, 6=complete. TODO: verify in-game
  */
 public final class CorsairCurse extends Quest {
 
@@ -39,6 +39,6 @@ public final class CorsairCurse extends Quest {
     }
 
     @Override public String name()       { return "The Corsair Curse"; }
-    @Override public int stageVarp()     { return Varbits.QUEST_CORSAIR_CURSE; }
+    @Override public int stageVarbit()   { return Varbits.QUEST_CORSAIR_CURSE; }
     @Override public int completeStage() { return 6; }
 }

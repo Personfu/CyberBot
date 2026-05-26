@@ -72,31 +72,34 @@ public final class Varbits {
     public static final int DIARY_FALADOR_HARD       = 4505;
     public static final int DIARY_FALADOR_ELITE      = 4506;
 
-    // ── F2P quest stage varbits (mostly from quest-helper/QuestVarbits.java) ─
-    public static final int QUEST_COOKS_ASSISTANT      = 29;
-    public static final int QUEST_ROMEO_JULIET         = 144;
-    public static final int QUEST_SHEEP_SHEARER        = 179;
-    public static final int QUEST_GOBLIN_DIPLOMACY     = 130;
-    public static final int QUEST_IMP_CATCHER          = 8;
-    public static final int QUEST_WITCHES_POTION       = 67;
-    public static final int QUEST_RESTLESS_GHOST       = 107;
-    public static final int QUEST_VAMPYRE_SLAYER       = 178;
-    public static final int QUEST_ERNEST_THE_CHICKEN   = 32;
-    public static final int QUEST_DORICS_QUEST         = 31;
-    public static final int QUEST_PRINCE_ALI_RESCUE    = 273;
-    public static final int QUEST_KNIGHTS_SWORD        = 122;
-    public static final int QUEST_DRAGON_SLAYER        = 176;
-    public static final int QUEST_LOST_CITY            = 147;
-    public static final int QUEST_MISTHALIN_MYSTERY    = 6557;
-    public static final int QUEST_X_MARKS_THE_SPOT     = 8063;
-    public static final int QUEST_BELOW_ICE_MOUNTAIN   = 11103;
-    // These use varp (getConfig) not getBitValue
-    public static final int QUEST_DEMON_SLAYER         = 18;   // varp
-    public static final int QUEST_BLACK_KNIGHTS_FORTRESS = 176; // varp (complete=1)
-    public static final int QUEST_RUNE_MYSTERIES       = 63;   // varp
-    public static final int QUEST_SHIELD_OF_ARRAV      = 73;   // varp
-    public static final int QUEST_PIRATES_TREASURE     = 71;   // varp
-    public static final int QUEST_CORSAIR_CURSE        = 367;  // varp
+    // ── F2P Quest VarPlayers — read via PlayerSettings.getConfig(id) ────────────
+    // Values confirmed against RuneLite QuestVarPlayer.java (May 2026).
+    public static final int QUEST_COOKS_ASSISTANT        = 29;   // VarPlayer
+    public static final int QUEST_ROMEO_JULIET           = 144;  // VarPlayer
+    public static final int QUEST_SHEEP_SHEARER          = 179;  // VarPlayer, complete=21
+    public static final int QUEST_IMP_CATCHER            = 160;  // VarPlayer (was wrongly 8!)
+    public static final int QUEST_WITCHES_POTION         = 67;   // VarPlayer
+    public static final int QUEST_RESTLESS_GHOST         = 107;  // VarPlayer
+    public static final int QUEST_VAMPYRE_SLAYER         = 178;  // VarPlayer
+    public static final int QUEST_ERNEST_THE_CHICKEN     = 32;   // VarPlayer
+    public static final int QUEST_DORICS_QUEST           = 31;   // VarPlayer
+    public static final int QUEST_PRINCE_ALI_RESCUE      = 273;  // VarPlayer
+    public static final int QUEST_KNIGHTS_SWORD          = 122;  // VarPlayer
+    public static final int QUEST_DRAGON_SLAYER          = 176;  // VarPlayer (Dragon Slayer I)
+    public static final int QUEST_RUNE_MYSTERIES         = 63;   // VarPlayer
+    public static final int QUEST_SHIELD_OF_ARRAV        = 145;  // VarPlayer (was wrongly 73!)
+    public static final int QUEST_PIRATES_TREASURE       = 71;   // VarPlayer
+    public static final int QUEST_BLACK_KNIGHTS_FORTRESS = 130;  // VarPlayer (was wrongly 176!)
+
+    // ── F2P Quest VarBits — read via PlayerSettings.getBitValue(id) ──────────
+    // Confirmed via QuestVarbits.java; numeric IDs from OSRS community cache data.
+    public static final int QUEST_GOBLIN_DIPLOMACY       = 3536;  // VarBit — TODO: verify in-game
+    public static final int QUEST_DEMON_SLAYER           = 3532;  // VarBit, post-2021 rework — TODO: verify
+    public static final int QUEST_CORSAIR_CURSE          = 5941;  // VarBit — TODO: verify in-game
+    public static final int QUEST_MISTHALIN_MYSTERY      = 6557;  // VarBit (confirmed)
+    public static final int QUEST_X_MARKS_THE_SPOT       = 8063;  // VarBit (confirmed)
+    public static final int QUEST_BELOW_ICE_MOUNTAIN     = 11103; // VarBit (confirmed)
+    public static final int QUEST_IDES_OF_MILK           = 13065; // VarBit (2025 quest) — TODO: verify
 
     // ── Common world state checks ────────────────────────────────────────────
     public static final int POLL_BOOTH_ACTIVE = 375;

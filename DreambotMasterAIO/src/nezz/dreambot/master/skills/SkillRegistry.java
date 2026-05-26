@@ -1,6 +1,7 @@
 package nezz.dreambot.master.skills;
 
 import nezz.dreambot.master.skills.impl.AttackModule;
+import nezz.dreambot.master.skills.impl.BrutusKillerModule;
 import nezz.dreambot.master.skills.impl.CookingModule;
 import nezz.dreambot.master.skills.impl.CraftingModule;
 import nezz.dreambot.master.skills.impl.DefenseModule;
@@ -32,6 +33,7 @@ public final class SkillRegistry {
 
     static {
         register(new AttackModule());
+        register(new BrutusKillerModule());
         register(new StrengthModule());
         register(new DefenseModule());
         register(new RangedModule());

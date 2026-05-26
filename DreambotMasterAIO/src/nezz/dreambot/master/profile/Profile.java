@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
+import org.dreambot.api.methods.skills.Skill;
 
 /**
  * Runtime configuration for the MasterAIO. Holds account creds, the
@@ -22,6 +23,14 @@ public final class Profile {
     public String accountName    = "";
     public String accountAge     = "1990-01-01";
     public boolean useQuickstart = false;
+    /**
+     * Per-account behavioral seed. Derived from username hash when 0,
+     * producing stable but unique mouse speed / AFK tendency per account
+     * so that all accounts on the farm behave differently.
+     */
+    public long  accountSeed  = 0L;
+    /** Which skill XP lamps and stars are applied to. */
+    public Skill lampSkill    = Skill.ATTACK;
 
     // ── Plan ─────────────────────────────────────────────────────────────────
     public BuildPlan plan = BuildPlan.defaultF2P();
@@ -61,6 +70,18 @@ public final class Profile {
     public int  stopAfterHours    = 0;       // 0 = never
     public long stopAtTotalXp     = 0L;
     public boolean stopOnTradeReq = true;
+
+    /**
+     * Returns a stable seed for per-account behavioral variation.
+     * Auto-seeds from username hash if no explicit seed was configured.
+     */
+    public long accountSeed() {
+        if (accountSeed == 0L && !accountName.isEmpty()) {
+            // Knuth multiplicative hash — spreads username bits across the long
+            accountSeed = (long) accountName.hashCode() * 2654435761L;
+        }
+        return accountSeed;
+    }
 
     // ────────────────────────────────────────────────────────────────────────
     // Persistence

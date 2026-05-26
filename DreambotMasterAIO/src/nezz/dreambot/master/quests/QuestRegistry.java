@@ -1,6 +1,7 @@
 package nezz.dreambot.master.quests;
 
 import nezz.dreambot.master.quests.impl.BlackKnightsFortress;
+import nezz.dreambot.master.quests.impl.BelowIceMountain;
 import nezz.dreambot.master.quests.impl.CooksAssistant;
 import nezz.dreambot.master.quests.impl.CorsairCurse;
 import nezz.dreambot.master.quests.impl.DemonSlayer;
@@ -8,6 +9,7 @@ import nezz.dreambot.master.quests.impl.DoricQuest;
 import nezz.dreambot.master.quests.impl.DragonSlayer;
 import nezz.dreambot.master.quests.impl.ErnestTheChicken;
 import nezz.dreambot.master.quests.impl.GoblinDiplomacy;
+import nezz.dreambot.master.quests.impl.IdesOfMilk;
 import nezz.dreambot.master.quests.impl.ImpCatcher;
 import nezz.dreambot.master.quests.impl.KnightsSword;
 import nezz.dreambot.master.quests.impl.MisthalinMystery;
@@ -60,6 +62,8 @@ public final class QuestRegistry {
         register(new DemonSlayer());
         register(new ShieldOfArrav());
         register(new DragonSlayer());
+        register(new IdesOfMilk());
+        register(new BelowIceMountain());
     }
 
     private QuestRegistry() { }

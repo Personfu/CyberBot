@@ -1,15 +1,18 @@
 <div align="center">
 
-# FLLC Master AIO
+# CyberBot — FLLC Master AIO
 
-*From-zero account builder for DreamBot — Tutorial Island, 10 F2P quests, 9 priority skills, antiban, breaks.*
+**Full F2P account builder · 21 quests · 16 skill modules · 6 money routes · human-grade antiban**
 
-![banner](../assets/master/banner.svg)
-
-[![Java](https://img.shields.io/badge/Java-11%20Target-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
-[![DreamBot](https://img.shields.io/badge/DreamBot-4.x-5c67f2?style=for-the-badge)](https://dreambot.org/)
+[![Java](https://img.shields.io/badge/Java-11-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![DreamBot](https://img.shields.io/badge/DreamBot-3.x-5c67f2?style=for-the-badge)](https://dreambot.org/)
 [![License](https://img.shields.io/badge/License-MIT-00ff88?style=for-the-badge)](../LICENSE)
-[![Status](https://img.shields.io/badge/Status-Alpha-ffd54a?style=for-the-badge)](#)
+[![Quests](https://img.shields.io/badge/F2P_Quests-21%2F21-brightgreen?style=for-the-badge)](#quests)
+[![Skills](https://img.shields.io/badge/Skills-16_modules-blue?style=for-the-badge)](#skills)
+
+<img src="https://oldschool.runescape.wiki/images/thumb/Lumbridge.png/800px-Lumbridge.png" width="720" alt="Lumbridge — default starting area"/>
+
+*Drives a fresh account from the login screen through Tutorial Island, every F2P quest, and a full route-to-99 on every F2P skill — hands-free, 24/7.*
 
 </div>
 
