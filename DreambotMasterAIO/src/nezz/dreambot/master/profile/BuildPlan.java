@@ -83,7 +83,9 @@ public final class BuildPlan {
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Fishing",      15));
         p.add(new Phase(PhaseType.SKILL_LEVEL, "Cooking",      15));
 
-        // PHASE 3: Basic money making -> 25k gp
+        // PHASE 3: Immediate GP — soft clay (zero requirements, almost no bot competition)
+        // SoftClayRoute is faster to start than fighting and needs nothing from bank
+        p.add(new Phase(PhaseType.MONEY_MAKING, "soft_clay",  0).opt("gpTarget", 30_000));
         p.add(new Phase(PhaseType.MONEY_MAKING, "chicken",    0).opt("gpTarget", 15_000));
         p.add(new Phase(PhaseType.MONEY_MAKING, "cowhide",    0).opt("gpTarget", 25_000));
 
@@ -132,9 +134,12 @@ public final class BuildPlan {
         // PHASE 10: Dragon Slayer I (needs 32 QP, have 43)
         p.add(new Phase(PhaseType.QUEST, "Dragon Slayer I", 0));
 
-        // PHASE 11: Post-quest money making
-        p.add(new Phase(PhaseType.MONEY_MAKING, "flax_spin",  0).opt("gpTarget", 300_000));
-        p.add(new Phase(PhaseType.MONEY_MAKING, "cowhide",    0).opt("gpTarget", 200_000));
+        // PHASE 11: Post-quest money making — Hill Giants for limpwurt roots (~200k/hr)
+        // Most bots ignore Edgeville Dungeon navigation; this route has almost zero competition
+        p.add(new Phase(PhaseType.MONEY_MAKING, "hill_giants", 0).opt("gpTarget", 500_000));
+        p.add(new Phase(PhaseType.MONEY_MAKING, "soft_clay",   0).opt("gpTarget", 200_000));
+        p.add(new Phase(PhaseType.MONEY_MAKING, "flax_spin",   0).opt("gpTarget", 300_000));
+        p.add(new Phase(PhaseType.MONEY_MAKING, "cowhide",     0).opt("gpTarget", 200_000));
 
         // PHASE 12: Brutus main grind + Varrock Sewers Moss Giant safe-spot (primary anti-detection trainer)
         // MossGiant module navigates to Varrock Sewers manhole (~3289,3394), cuts cobwebs with knife,

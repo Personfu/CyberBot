@@ -196,6 +196,15 @@ public final class ItemID {
     public static final int CANDLE                = 36;
     public static final int CANDLE_BLACK          = 38;
 
+    // ── Gathered resources ──────────────────────────────────────────────────────
+    public static final int CLAY                  = 434;
+    public static final int SOFT_CLAY             = 1761;   // SoftClayRoute product
+
+    // ── Monster drops / keys ─────────────────────────────────────────────────
+    public static final int LIMPWURT_ROOT         = 225;    // Hill Giant / Moss Giant drop; ~1.5-3k gp
+    public static final int MOSSY_KEY             = 22997;  // Moss Giant unique drop
+    public static final int BRASS_KEY             = 983;    // Edgeville Dungeon north section
+
     // ── Crafting / spinning ─────────────────────────────────────────────────
     public static final int FLAX                  = 1779;
     public static final int BOWSTRING             = 1777;

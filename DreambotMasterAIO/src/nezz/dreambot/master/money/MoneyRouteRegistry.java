@@ -14,8 +14,10 @@ public final class MoneyRouteRegistry {
 
     static {
         register(new ChickenRoute());    // no requirements, always available
+        register(new SoftClayRoute());   // no requirements, most bot-free method ~60k/hr
         register(new CowhideRoute());    // no requirements, solid GP
         register(new FlaxSpinRoute());   // no skill req, best non-combat F2P
+        register(new HillGiantRoute());  // 30+ HP, limpwurt roots ~200k/hr
         register(new SteelBarRoute());   // requires 30 Mining / Smithing
         register(new AirRuneRoute());    // requires 1 RC
         register(new YewLogsRoute());    // requires 60 WC

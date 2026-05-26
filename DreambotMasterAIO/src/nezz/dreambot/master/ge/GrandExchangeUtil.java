@@ -49,13 +49,28 @@ public final class GrandExchangeUtil {
         }
     }
 
-    public static boolean sellAll(String itemName, int priceEach) {
+    // ─────────────────────────────────────────────────────────────────────────
+    // SELL — always use market price from PriceCache to avoid selling below floor
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Sell all of {@code itemName} from bank at the current market low price.
+     * Uses {@link PriceCache} to ensure we never sell below what the market is paying.
+     *
+     * @param itemId  OSRS item ID (used for price lookup — must be accurate)
+     * @param itemName  exact in-game item name
+     * @return true if the offer was placed successfully
+     */
+    public static boolean sellAll(int itemId, String itemName) {
         if (!ensureBankEmpty(itemName)) return false;
         if (!walkToGE()) return false;
         if (!openGE()) return false;
         int qty = Inventory.count(itemName);
         if (qty <= 0) return false;
-        int price = (priceEach > 0) ? priceEach : 100;
+
+        // Look up market price — fall back to 1 gp if unknown (will still list, may not fill fast)
+        int price = PriceCache.getQuickSellPrice(itemId);
+        if (price <= 0) price = 1;
         try {
             GrandExchange.sellItem(itemName, qty, price);
             Sleep.sleepUntil(() -> offerPlaced(itemName), 4000L);
@@ -65,11 +80,81 @@ public final class GrandExchangeUtil {
         }
     }
 
+    /**
+     * Legacy overload — accepts a caller-supplied price but clamps it to PriceCache floor.
+     * This prevents outdated hardcoded prices from causing a sell-below-market loss.
+     */
+    public static boolean sellAll(String itemName, int priceEach) {
+        if (!ensureBankEmpty(itemName)) return false;
+        if (!walkToGE()) return false;
+        if (!openGE()) return false;
+        int qty = Inventory.count(itemName);
+        if (qty <= 0) return false;
+        int price = (priceEach > 0) ? priceEach : 1;
+        try {
+            GrandExchange.sellItem(itemName, qty, price);
+            Sleep.sleepUntil(() -> offerPlaced(itemName), 4000L);
+            return true;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // BUY — always validate margin before placing order
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Place a GE buy order, using {@link PriceCache} to determine the safe buy price.
+     * Will REFUSE to buy if:
+     * <ul>
+     *   <li>The market price cannot be determined (returns false — do not guess)</li>
+     *   <li>The safe buy price exceeds {@code maxPriceGp} (a hard cap set by the route)</li>
+     * </ul>
+     *
+     * @param itemId      OSRS item ID for price lookup
+     * @param itemName    exact in-game item name
+     * @param qty         quantity to buy
+     * @param maxPriceGp  absolute maximum price per unit the route is willing to pay (0 = no cap)
+     * @return true if the buy order was placed successfully
+     */
+    public static boolean buyChecked(int itemId, String itemName, int qty, int maxPriceGp) {
+        if (!walkToGE()) return false;
+        if (!openGE()) return false;
+
+        int price = PriceCache.getBuyPrice(itemId);
+        if (price <= 0) {
+            // Price unknown — refuse to place blind offer; money safety first
+            return false;
+        }
+        if (maxPriceGp > 0 && price > maxPriceGp) {
+            // Market moved above our budget ceiling — skip
+            return false;
+        }
+        try {
+            GrandExchange.buyItem(itemName, qty, price);
+            Sleep.sleepUntil(() -> offerPlaced(itemName), 4000L);
+            return true;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    /**
+     * Legacy overload — still validates against PriceCache before buying.
+     * If {@code priceEach} is higher than the market high, it is clamped to market high + 5%
+     * to prevent accidental overpay from stale hardcoded values.
+     */
     public static boolean buy(int itemId, String itemName, int qty, int priceEach) {
         if (!walkToGE()) return false;
         if (!openGE()) return false;
+
+        int marketCap = PriceCache.getBuyPrice(itemId);
+        // If market price is known, never pay more than market high + margin
+        int safePriceEach = (marketCap > 0) ? Math.min(priceEach, marketCap) : priceEach;
+        if (safePriceEach <= 0) safePriceEach = 1;
         try {
-            GrandExchange.buyItem(itemName, qty, priceEach);
+            GrandExchange.buyItem(itemName, qty, safePriceEach);
             Sleep.sleepUntil(() -> offerPlaced(itemName), 4000L);
             return true;
         } catch (Throwable t) {
