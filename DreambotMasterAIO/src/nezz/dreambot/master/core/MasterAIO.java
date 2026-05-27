@@ -5,6 +5,7 @@ import nezz.dreambot.master.antiban.BreakManager;
 import nezz.dreambot.master.antiban.HumanMouse;
 import nezz.dreambot.master.ge.GESellTask;
 import nezz.dreambot.master.gui.MasterGui;
+import nezz.dreambot.master.tasks.ActivityRunner;
 import nezz.dreambot.master.profile.BuildPlan;
 import nezz.dreambot.master.profile.Profile;
 import nezz.dreambot.master.money.MoneyRouteTask;
@@ -19,6 +20,8 @@ import org.dreambot.api.methods.skills.Skills;
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;
+import nezz.dreambot.master.util.WebhookManager;
+import org.dreambot.api.script.listener.LoginListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -49,7 +52,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                   "Modelled after SlugBuilder / HowP2PAIO. Drop-in profile loader, antiban, mule support.",
     category    = Category.MISC
 )
-public class MasterAIO extends AbstractScript {
+public class MasterAIO extends AbstractScript implements LoginListener {
 
     private Profile          profile;
     private TaskScheduler    scheduler;
@@ -78,6 +81,8 @@ public class MasterAIO extends AbstractScript {
                 () -> running.set(false)
             );
             gui.setVisible(true);
+            gui.toFront();
+            gui.requestFocus();
         });
 
         // Block the script thread until the user clicks Start or closes the GUI.
@@ -94,11 +99,26 @@ public class MasterAIO extends AbstractScript {
         startTime = System.currentTimeMillis();
         HumanMouse.install(profile);
         SkillTracker.start();
-        scheduler.add(new BuildPlanTask(profile, scheduler, log));
+
+        if (profile.activityMode && !profile.activityId.isEmpty()) {
+            // ── Activity / quick-start mode ──────────────────────────────────
+            ActivityRunner runner = ActivityRunner.byId(profile.activityId, profile.activityMethod, log);
+            if (runner != null) {
+                scheduler.add(runner);
+                log.info("MasterAIO [ACTIVITY] → " + runner.label());
+            } else {
+                log.warn("Unknown activity '" + profile.activityId + "' — falling back to Build Plan.");
+                scheduler.add(new BuildPlanTask(profile, scheduler, log));
+            }
+        } else {
+            // ── Full build-plan mode ─────────────────────────────────────────
+            scheduler.add(new BuildPlanTask(profile, scheduler, log));
+            log.info("MasterAIO [PLAN] started — " + profile.plan.phases().size() + " phases");
+        }
+
         scheduler.add(new GESellTask(log));   // permanent sell-queue processor
         antiban.register(scheduler);
         breaks.register(scheduler);
-        log.info("MasterAIO started — plan: " + profile.plan.phases().size() + " phases");
     }
 
     @Override
@@ -117,6 +137,26 @@ public class MasterAIO extends AbstractScript {
     public void onExit() {
         running.set(false);
         if (gui != null) gui.dispose();
+    }
+
+    /**
+     * DreamBot LoginListener callback. Response code 4 = account banned.
+     * Stops the script immediately and logs the event so Discord webhook can fire.
+     */
+    @Override
+    public void onLoginResponse(int response) {
+        if (response == 4) {
+            String player = "unknown";
+            try {
+                if (org.dreambot.api.methods.interactive.Players.getLocal() != null) {
+                    player = org.dreambot.api.methods.interactive.Players.getLocal().getName();
+                }
+            } catch (Throwable ignored) {}
+            log.info("[!!!] Login response 4 \u2014 account may be BANNED. Stopping script.");
+            WebhookManager.sendBanNotification(player);
+            running.set(false);
+            stop();
+        }
     }
 
     // ────────────────────────────────────────────────────────────────────────
@@ -207,25 +247,40 @@ public class MasterAIO extends AbstractScript {
         ty += 16;
 
         // ── Phase / task info ─────────────────────────────────────────────
-        BuildPlan.Phase phase = profile.plan.current();
-        int cursor     = profile.plan.cursor() + 1;
-        int total      = profile.plan.phases().size();
-        String phType  = phase == null ? "DONE" : phase.type.name();
-        String phTgt   = phase == null ? "--"   : phase.target + (phase.value > 0 ? " → lvl " + phase.value : "");
         String taskLbl = (scheduler != null && scheduler.active() != null)
                 ? scheduler.active().label() : "idle";
+        String tradeStatus = nezz.dreambot.master.ge.GrandExchangeUtil.isTradeUnrestricted()
+                ? "UNRESTRICTED" : "RESTRICTED";
 
-        row(g2, tx, ty, PW - 16, "PHASE",  "[" + phType + "] " + phTgt); ty += 13;
-        row(g2, tx, ty, PW - 16, "PROG",   cursor + " / " + total);      ty += 13;
-        row(g2, tx, ty, PW - 16, "TASK",   taskLbl);                     ty += 13;
+        if (profile.activityMode) {
+            row(g2, tx, ty, PW - 16, "MODE",   "ACTIVITY: " + profile.activityId); ty += 13;
+        } else {
+            BuildPlan.Phase phase = profile.plan.current();
+            int cursor     = profile.plan.cursor() + 1;
+            int total      = profile.plan.phases().size();
+            String phType  = phase == null ? "DONE" : phase.type.name();
+            String phTgt   = phase == null ? "--"   : phase.target + (phase.value > 0 ? " → lvl " + phase.value : "");
+            row(g2, tx, ty, PW - 16, "PHASE",  "[" + phType + "] " + phTgt); ty += 13;
+            row(g2, tx, ty, PW - 16, "PROG",   cursor + " / " + total);      ty += 13;
+        }
+        row(g2, tx, ty, PW - 16, "TASK",   taskLbl);                         ty += 13;
 
-        // State with color
+        // State + trade status with color
         g2.setFont(F_KEY);
         g2.setColor(C_KEY);
         g2.drawString("STATUS", tx, ty);
         g2.setFont(F_VAL);
         g2.setColor(stateColor(state));
         g2.drawString(":: " + state.name(), tx + 56, ty);
+        ty += 13;
+
+        // Trade restriction line
+        boolean tradable = nezz.dreambot.master.ge.GrandExchangeUtil.isTradeUnrestricted();
+        g2.setFont(F_KEY); g2.setColor(C_KEY);
+        g2.drawString("TRADE", tx, ty);
+        g2.setFont(F_VAL);
+        g2.setColor(tradable ? new Color(0, 255, 128) : new Color(255, 90, 60));
+        g2.drawString(":: " + (tradable ? "UNRESTRICTED" : "RESTRICTED (<100ttl/10qp/20hr)"), tx + 56, ty);
         ty += 13;
 
         // Separator

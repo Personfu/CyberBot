@@ -6,10 +6,17 @@ import org.dreambot.api.methods.container.impl.bank.Bank;
 import org.dreambot.api.methods.grandexchange.GrandExchange;
 import org.dreambot.api.methods.grandexchange.GrandExchangeItem;
 import org.dreambot.api.methods.interactive.NPCs;
+import org.dreambot.api.methods.interactive.Players;
 import org.dreambot.api.methods.map.Tile;
+import org.dreambot.api.methods.settings.PlayerSettings;
+import org.dreambot.api.methods.skills.Skills;
 import org.dreambot.api.methods.walking.impl.Walking;
 import org.dreambot.api.utilities.Sleep;
 import org.dreambot.api.wrappers.interactive.NPC;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public final class GrandExchangeUtil {
 
@@ -17,6 +24,89 @@ public final class GrandExchangeUtil {
     private static final String CLERK_NAME = "Grand Exchange Clerk";
 
     private GrandExchangeUtil() {}
+
+    // ── Trade restriction ─────────────────────────────────────────────
+    /**
+     * Returns true when the account has cleared all F2P GE trade requirements:
+     * <ul>
+     *   <li>Total level ≥ 100</li>
+     *   <li>Quest points ≥ 10 &nbsp;(config 101)</li>
+     *   <li>Minutes played ≥ 1200 &nbsp;(20 hours, VarClientInt 526)</li>
+     * </ul>
+     * Source: SlugHub scripter community; verified against Jagex wiki.
+     * Restricted accounts silently fail GE interactions — always check this first.
+     */
+    public static boolean isTradeUnrestricted() {
+        // Total level and quest points are the most reliable checks
+        if (Skills.getTotalLevel() < 100) return false;
+        if (PlayerSettings.getConfig(101) < 10) return false;
+        // Time played: varbit 2511 = minutes in-game. 0 = unread / error → assume ok
+        try {
+            int minutesPlayed = PlayerSettings.getBitValue(2511);
+            if (minutesPlayed > 0 && minutesPlayed < 1200) return false;
+        } catch (Throwable ignored) { }
+        return true;
+    }
+
+    /**
+     * Items that are GE-restricted for trade-restricted accounts.
+     * Even if an account meets the threshold, these items may have tight buy limits.
+     * Used to skip sell attempts that would silently fail.
+     */
+    public static final List<String> GE_RESTRICTED_ITEMS = Arrays.asList(
+        "Oak logs", "Willow logs", "Yew logs",
+        "Raw shrimps", "Shrimps", "Raw anchovies", "Anchovies",
+        "Raw lobster", "Lobster",
+        "Clay", "Soft clay",
+        "Copper ore", "Tin ore", "Iron ore", "Silver ore",
+        "Gold ore", "Coal", "Mithril ore", "Adamantite ore", "Runite ore",
+        "Cowhide",
+        "Vial", "Vial of water", "Jug of water",
+        "Fishing bait", "Feather", "Eye of newt", "Wine of zamorak",
+        "Air rune", "Water rune", "Earth rune", "Fire rune", "Mind rune",
+        "Chaos rune"
+    );
+
+    /** True if this item name can be sold at GE by the current account. */
+    public static boolean canSell(String itemName) {
+        return isTradeUnrestricted();
+    }
+
+    /**
+     * Items this bot produces that are worth selling at the GE.
+     * Restricted accounts cannot sell the items in GE_RESTRICTED_ITEMS,
+     * so they stay queued until the account becomes unrestricted.
+     */
+    public static final List<String> SELLOFF_LIST = Arrays.asList(
+        "Limpwurt root",
+        "Nature rune",
+        "Chaos rune",
+        "Mithril ore",
+        "Cowhide",
+        "Soft clay",
+        "Flax",
+        "Steel bar"
+    );
+
+    /** Selloff items that a trade-restricted account can still sell (non-GE-restricted). */
+    public static List<String> getFilteredSelloffList() {
+        return SELLOFF_LIST.stream()
+                .filter(item -> !GE_RESTRICTED_ITEMS.contains(item))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns true if the given item should be queued for GE sale.
+     * Unrestricted accounts use the full list; restricted accounts use a
+     * filtered list that excludes GE-restricted items.
+     */
+    public static boolean shouldSell(String itemName) {
+        if (isTradeUnrestricted()) {
+            return SELLOFF_LIST.contains(itemName);
+        } else {
+            return getFilteredSelloffList().contains(itemName);
+        }
+    }
 
     public static boolean isAtGE() {
         return GE_TILE.distance(
@@ -62,6 +152,7 @@ public final class GrandExchangeUtil {
      * @return true if the offer was placed successfully
      */
     public static boolean sellAll(int itemId, String itemName) {
+        if (!isTradeUnrestricted()) return false;  // account cannot trade yet
         if (!ensureBankEmpty(itemName)) return false;
         if (!walkToGE()) return false;
         if (!openGE()) return false;
@@ -85,6 +176,7 @@ public final class GrandExchangeUtil {
      * This prevents outdated hardcoded prices from causing a sell-below-market loss.
      */
     public static boolean sellAll(String itemName, int priceEach) {
+        if (!isTradeUnrestricted()) return false;  // account cannot trade yet
         if (!ensureBankEmpty(itemName)) return false;
         if (!walkToGE()) return false;
         if (!openGE()) return false;
@@ -119,6 +211,7 @@ public final class GrandExchangeUtil {
      * @return true if the buy order was placed successfully
      */
     public static boolean buyChecked(int itemId, String itemName, int qty, int maxPriceGp) {
+        if (!isTradeUnrestricted()) return false;  // account cannot trade yet
         if (!walkToGE()) return false;
         if (!openGE()) return false;
 
@@ -146,6 +239,7 @@ public final class GrandExchangeUtil {
      * to prevent accidental overpay from stale hardcoded values.
      */
     public static boolean buy(int itemId, String itemName, int qty, int priceEach) {
+        if (!isTradeUnrestricted()) return false;  // account cannot trade yet
         if (!walkToGE()) return false;
         if (!openGE()) return false;
 

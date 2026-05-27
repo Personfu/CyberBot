@@ -49,6 +49,8 @@ public final class GESellTask extends Task {
     @Override public boolean isComplete() { return false; }
 
     @Override public boolean isReady() {
+        // Can't trade until 100 ttl + 10 QP + 1200 minutes played
+        if (!GrandExchangeUtil.isTradeUnrestricted()) return false;
         // Ready when queue has something big enough to bother with
         if (SELL_QUEUE.isEmpty()) return false;
         for (int[] v : SELL_QUEUE.values()) {

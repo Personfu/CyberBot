@@ -42,6 +42,7 @@ public final class MasterGui extends JFrame {
     private Profile  profile;
     private Runnable onStart;
     private Runnable onStop;
+    private String selectedActivityId = "";  // set by activity tab selection
 
     public MasterGui(CountDownLatch latch) {
         super("CYBER.BOT  //  FLLC Master AIO  v2.0");
@@ -58,8 +59,9 @@ public final class MasterGui extends JFrame {
         setResizable(false);
         getContentPane().setBackground(BG);
         setLayout(new BorderLayout());
-        try { UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName()); }
-        catch (Exception ignored) { }
+        // Force above DreamBot’s own window (Substance-decorated JFrame)
+        setAlwaysOnTop(true);
+        setAutoRequestFocus(true);
     }
 
     /** Bind profile + callbacks and populate content. Must be called before setVisible. */
@@ -102,6 +104,7 @@ public final class MasterGui extends JFrame {
         tabs.setFont(F_LBL);
         tabs.addTab("[ ACCOUNT ]", accountTab());
         tabs.addTab("[ PLAN ]",    planTab());
+        tabs.addTab("[ ACTIVITY ]", activityTab());
         tabs.addTab("[ QUESTS ]",  questsTab());
         tabs.addTab("[ ANTIBAN ]", antibanTab());
         tabs.addTab("[ NOTIFY ]",  stopTab());
@@ -175,6 +178,142 @@ public final class MasterGui extends JFrame {
         }));
 
         p.add(sp, BorderLayout.CENTER);
+        p.add(right, BorderLayout.EAST);
+        return p;
+    }
+
+    // ── Activity / quick-start tab ──────────────────────────────────────────
+    /**
+     * Lets the user pick one activity and run it indefinitely instead of
+     * following the full BuildPlan. Ideal for focused grinding sessions.
+     *
+     * <p>Item format in the list model: {@code "id||Display label"} for
+     * selectable rows, or {@code "▬ CATEGORY"} for non-selectable headers.</p>
+     */
+    private JComponent activityTab() {
+        JPanel p = panel(new BorderLayout(8, 8));
+
+        // ── Build list model ──────────────────────────────────────────
+        DefaultListModel<String> model = new DefaultListModel<>();
+
+        model.addElement("▬ COMBAT");
+        model.addElement("MossGiant||Moss Giants  (Varrock Sewers, magic safe-spot, ~200k xp/hr)");
+        model.addElement("Brutus||Brutus + Cows  (Lumbridge field, melee, free food)");
+        model.addElement("hill_giants||Hill Giants  (Edgeville Dungeon, ~200k gp/hr + limpwurt)");
+        model.addElement("cowhide||Cows for Cowhide  (Lumbridge, ~80k gp/hr)");
+        model.addElement("chicken||Chickens  (Lumbridge, feathers + raw chicken)");
+        model.addElement("Attack||Attack training  (cows, controlled)");
+        model.addElement("Strength||Strength training  (cows, aggressive)");
+        model.addElement("Defense||Defense training  (cows, defensive)");
+        model.addElement("Ranged||Ranged training  (progressive safe-spot)");
+        model.addElement("Magic||Magic training  (auto-casts best available spell)");
+        model.addElement("Prayer||Prayer  (bury bones from bank)");
+
+        model.addElement("▬ GATHERING");
+        model.addElement("Mining||Mining  (Tin → Iron → Coal → Mithril, progressive)");
+        model.addElement("Fishing||Fishing  (Shrimp → Trout → Lobster → Swordfish, progressive)");
+        model.addElement("Woodcutting||Woodcutting  (Tree → Oak → Willow → Yew, progressive)");
+
+        model.addElement("▬ ARTISAN");
+        model.addElement("Cooking||Cooking  (cook all banked raw fish)");
+        model.addElement("Firemaking||Firemaking  (burn logs from bank on Lumbridge path)");
+        model.addElement("Smithing||Smithing  (progressive, uses Edgeville / Al-Kharid furnace)");
+        model.addElement("Crafting||Crafting  (leather → gold jewelry → gems)");
+        model.addElement("Fletching||Fletching  (logs → headless arrows → bows)");
+        model.addElement("Runecrafting||Runecrafting  (Air → Body → Earth → Fire runes)");
+        model.addElement("Thieving||Thieving  (Men → Guards → Master farmers)");
+
+        model.addElement("▬ MONEY ROUTES");
+        model.addElement("soft_clay||Soft Clay  (Varrock East mine, ~60k gp/hr, zero reqs)");
+        model.addElement("flax_spin||Flax Spinning  (~100k gp/hr)");
+        model.addElement("steel_bars||Steel Bars  (blast furnace, ~500k gp/hr)");
+        model.addElement("air_runes||Air Runes  (Lumbridge, ~80k gp/hr)");
+
+        // ── JList ──────────────────────────────────────────────────
+        JList<String> list = new JList<>(model);
+        list.setBackground(BG3);
+        list.setFont(F_FLD);
+        list.setSelectionBackground(new Color(0, 60, 100));
+        list.setSelectionForeground(CYAN);
+        list.setCellRenderer(new ActivityCellRenderer());
+
+        // ── Right panel (selected info + launch) ─────────────────────
+        JPanel right = new JPanel();
+        right.setLayout(new BoxLayout(right, BoxLayout.Y_AXIS));
+        right.setBackground(BG2);
+        right.setBorder(new EmptyBorder(12, 10, 12, 10));
+        right.setPreferredSize(new Dimension(210, 0));
+
+        JLabel hdr = new JLabel("// SELECTED");
+        hdr.setFont(new Font("Consolas", Font.BOLD, 11));
+        hdr.setForeground(CYAN_DIM);
+        hdr.setAlignmentX(Component.LEFT_ALIGNMENT);
+        right.add(hdr);
+        right.add(Box.createVerticalStrut(6));
+
+        JLabel selLabel = new JLabel("<html><i>(pick an activity)</i></html>");
+        selLabel.setFont(F_FLD);
+        selLabel.setForeground(FG);
+        selLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        right.add(selLabel);
+        right.add(Box.createVerticalStrut(12));
+
+        JSeparator sep = new JSeparator();
+        sep.setForeground(CYAN_DIM);
+        sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        right.add(sep);
+        right.add(Box.createVerticalStrut(10));
+
+        JLabel notesHdr = new JLabel("// NOTES");
+        notesHdr.setFont(new Font("Consolas", Font.BOLD, 11));
+        notesHdr.setForeground(CYAN_DIM);
+        notesHdr.setAlignmentX(Component.LEFT_ALIGNMENT);
+        right.add(notesHdr);
+        right.add(Box.createVerticalStrut(4));
+
+        JLabel notes = new JLabel("<html>Load runes + food<br>in bank before starting<br>Moss Giants.</html>");
+        notes.setFont(new Font("Consolas", Font.PLAIN, 11));
+        notes.setForeground(YELLOW);
+        notes.setAlignmentX(Component.LEFT_ALIGNMENT);
+        right.add(notes);
+        right.add(Box.createVerticalGlue());
+
+        JButton launch = cyberBtn("\u26a1  LAUNCH ACTIVITY", GREEN, () -> {
+            if (selectedActivityId.isEmpty()) {
+                JOptionPane.showMessageDialog(MasterGui.this,
+                    "Select an activity from the list first.",
+                    "No Activity Selected", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            profile.activityMode   = true;
+            profile.activityId     = selectedActivityId;
+            profile.activityMethod = "";
+            if (onStart != null) onStart.run();
+            dispose();
+            latch.countDown();
+        });
+        launch.setFont(new Font("Consolas", Font.BOLD, 13));
+        launch.setAlignmentX(Component.LEFT_ALIGNMENT);
+        launch.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+        right.add(launch);
+
+        // Wire list selection → update selectedActivityId and selLabel
+        list.addListSelectionListener(e -> {
+            if (e.getValueIsAdjusting()) return;
+            String val = list.getSelectedValue();
+            if (val == null || val.startsWith("▬")) {
+                list.clearSelection();
+                selectedActivityId = "";
+                selLabel.setText("<html><i>(pick an activity)</i></html>");
+                return;
+            }
+            selectedActivityId = val.split("\\|\\|")[0];
+            String display = val.contains("||") ? val.split("\\|\\|")[1] : val;
+            selLabel.setText("<html><b>" + display.replace("(", "<br><font color='#00dcff'>(")
+                .replace(")", ")</font>") + "</b></html>");
+        });
+
+        p.add(styledScroll(list), BorderLayout.CENTER);
         p.add(right, BorderLayout.EAST);
         return p;
     }
@@ -374,6 +513,39 @@ public final class MasterGui extends JFrame {
     private static String fmtPhase(BuildPlan.Phase ph) {
         String val = ph.value > 0 ? " \u2192 " + ph.value : "";
         return "[" + ph.type.name() + "]  " + ph.target + val;
+    }
+
+    /** Renders activity list rows: bold coloured headers vs selectable activity rows. */
+    private static final class ActivityCellRenderer extends DefaultListCellRenderer {
+        private static final Color CAT_BG  = new Color(8, 12, 24);
+        private static final Color CAT_FG  = new Color(255, 215, 50);  // yellow
+        private static final Color ROW_SEL = new Color(0, 50, 90);
+        private static final Color ROW_FG  = new Color(185, 225, 245);
+
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value,
+                int index, boolean isSelected, boolean hasFocus) {
+            JLabel l = (JLabel) super.getListCellRendererComponent(
+                    list, value, index, isSelected, hasFocus);
+            String s = value == null ? "" : value.toString();
+            if (s.startsWith("▬")) {
+                // Category header — not selectable, styled differently
+                l.setBackground(CAT_BG);
+                l.setForeground(CAT_FG);
+                l.setFont(new Font("Consolas", Font.BOLD, 11));
+                l.setBorder(new EmptyBorder(5, 6, 3, 4));
+                l.setText(s);
+            } else {
+                // Activity row
+                l.setBackground(isSelected ? ROW_SEL : new Color(10, 14, 26));
+                l.setForeground(isSelected ? new Color(0, 220, 255) : ROW_FG);
+                l.setFont(new Font("Consolas", Font.PLAIN, 12));
+                l.setBorder(new EmptyBorder(2, 18, 2, 4));
+                // Show only the display part after "||"
+                l.setText("↳  " + (s.contains("||") ? s.split("\\|\\|")[1] : s));
+            }
+            return l;
+        }
     }
 
     /** Colour-codes plan rows by phase type. */

@@ -71,6 +71,14 @@ public final class Profile {
     public long stopAtTotalXp     = 0L;
     public boolean stopOnTradeReq = true;
 
+    // ── Activity / quick-start mode ──────────────────────────────────────────
+    /** When true, run a single activity indefinitely instead of the BuildPlan. */
+    public boolean activityMode   = false;
+    /** Module name (e.g. "MossGiant", "Mining") or route ID (e.g. "soft_clay"). */
+    public String  activityId     = "";
+    /** Optional method override (e.g. "moss_giant_ranged"). Empty = auto-select. */
+    public String  activityMethod = "";
+
     /**
      * Returns a stable seed for per-account behavioral variation.
      * Auto-seeds from username hash if no explicit seed was configured.

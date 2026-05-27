@@ -4,6 +4,7 @@ import nezz.dreambot.master.id.ItemID;
 import nezz.dreambot.master.id.NpcID;
 import nezz.dreambot.master.id.ObjectID;
 import nezz.dreambot.master.skills.SkillModule;
+import nezz.dreambot.master.util.CombatUtil;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.combat.Combat;
 import org.dreambot.api.methods.combat.CombatStyle;
@@ -74,23 +75,21 @@ public final class MossGiantModule extends SkillModule {
 
     /**
      * The back room where Moss Giants spawn.
-     * Cobwebs block the entrance to this room from the rest of the sewers.
+     * Confirmed via in-game DreamBot tile overlay: player tile (3165, 9886, 0).
+     * Area covers the full corridor + giant room so traverseSewer() knows when
+     * we've arrived.
      */
-    private static final Area MOSS_ROOM        = new Area(3148, 9900, 3175, 9930, 0);
+    private static final Area MOSS_ROOM        = new Area(3148, 9870, 3185, 9910, 0);
 
     /**
-     * The exact wall-corner safe-spot tile.
-     * Stand here: the Moss Giants at the adjacent tiles cannot path to you,
-     * but you can target them with Magic or Ranged freely.
-     *
-     * Adjust x/y by ±1 if the geometry is slightly off on your client —
-     * the safe-spot is the north-east corner of the last pillar before the
-     * Giant room opens up.
+     * Wall-corner safe-spot confirmed from screenshot (Player Tile 3165, 9886, 0).
+     * Standing here the Moss Giants cannot melee-path to the player; Magic and
+     * Ranged reach them freely. The east wall + south wall form the corner pocket.
      */
-    private static final Tile SAFE_SPOT        = new Tile(3160, 9908, 0);
+    private static final Tile SAFE_SPOT        = new Tile(3165, 9886, 0);
 
-    /** Primary attack tile — the Moss Giant that stands in line-of-sight of the safe spot. */
-    private static final Tile TARGET_TILE      = new Tile(3162, 9906, 0);
+    /** Approximate spawn centre — giants cluster west/NW of the safe-spot. */
+    private static final Tile TARGET_TILE      = new Tile(3157, 9882, 0);
 
     /** Max distance from SAFE_SPOT to still consider a giant attackable. */
     private static final int  ATTACK_RADIUS    = 8;
@@ -109,6 +108,8 @@ public final class MossGiantModule extends SkillModule {
     // ── State ─────────────────────────────────────────────────────────────────
     /** Whether we are currently on a banking run. */
     private boolean banking = false;
+    /** Hop-fallback click helper for ranged attacks on moving NPCs. */
+    private final CombatUtil.NpcClickHelper clickHelper = new CombatUtil.NpcClickHelper();
 
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -309,7 +310,7 @@ public final class MossGiantModule extends SkillModule {
             Combat.setCombatStyle(CombatStyle.RANGED_RAPID);
             return Calculations.random(400, 700);
         }
-        if (giant.interact("Attack")) {
+        if (clickHelper.tryClick(giant, "Attack")) {
             return Calculations.random(1800, 3000);
         }
         return Calculations.random(700, 1200);
