@@ -9,6 +9,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
+import java.awt.image.BufferedImage;
 import java.awt.event.WindowEvent;
 import java.util.concurrent.CountDownLatch;
 
@@ -46,6 +47,7 @@ public final class MasterGui extends JFrame {
 
     public MasterGui(CountDownLatch latch) {
         super("CYBER.BOT  //  FLLC Master AIO  v2.0");
+        setIconImage(createLogoImage(32));
         this.latch = latch;
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -84,16 +86,38 @@ public final class MasterGui extends JFrame {
             new MatteBorder(0, 0, 2, 0, CYAN),
             new EmptyBorder(10, 16, 10, 16)));
 
+        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        left.setOpaque(false);
+        left.add(new JLabel(new ImageIcon(createLogoImage(28))));
+
         JLabel title = new JLabel("\u25c8  CYBER.BOT  //  FLLC MASTER AIO  //  v2.0");
         title.setFont(F_HEAD);
         title.setForeground(CYAN);
-        p.add(title, BorderLayout.WEST);
+        left.add(title);
+        p.add(left, BorderLayout.WEST);
 
         JLabel sub = new JLabel("FROM-ZERO F2P ACCOUNT BUILDER");
         sub.setFont(new Font("Consolas", Font.PLAIN, 10));
         sub.setForeground(CYAN_DIM);
         p.add(sub, BorderLayout.EAST);
         return p;
+    }
+
+    private Image createLogoImage(int size) {
+        BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = img.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(new Color(0, 255, 195));
+        g2.fillOval(0, 0, size, size);
+        g2.setColor(new Color(6, 9, 18));
+        g2.fillOval(3, 3, size - 6, size - 6);
+        g2.setColor(new Color(0, 220, 255));
+        g2.setStroke(new BasicStroke(Math.max(2, size / 10f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.drawArc(size * 0.18f, size * 0.18f, size * 0.64f, size * 0.64f, 140, 260);
+        g2.drawLine((int)(size * 0.42), (int)(size * 0.24), (int)(size * 0.42), (int)(size * 0.76));
+        g2.drawLine((int)(size * 0.44), (int)(size * 0.24), (int)(size * 0.70), (int)(size * 0.24));
+        g2.dispose();
+        return img;
     }
 
     // ── Tabs ──────────────────────────────────────────────────────────────────

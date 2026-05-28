@@ -146,13 +146,23 @@ public final class MossGiantModule extends SkillModule {
     }
 
     @Override public String pickMethod(int curr, int tgt) {
-        return "moss_giant_magic"; // default; caller can pass "moss_giant_ranged"
+        if (hasRangedWeapon() && hasRangedAmmo()
+                && Skills.getRealLevel(Skill.RANGED) >= Skills.getRealLevel(Skill.MAGIC)) {
+            return "moss_giant_ranged";
+        }
+        if (canCastEffectiveSpell(Skills.getRealLevel(Skill.MAGIC))) {
+            return "moss_giant_magic";
+        }
+        if (hasRangedWeapon() && hasRangedAmmo()) {
+            return "moss_giant_ranged";
+        }
+        return "moss_giant_magic";
     }
 
     @Override
     public String[] requiredItems(String method) {
         if ("moss_giant_ranged".equals(method)) {
-            return new String[] { "Knife", "Bronze arrow" };
+            return new String[] { "Knife", "Arrow", "Bow" };
         }
         return new String[] { "Knife", "Air rune", "Mind rune" };
     }
@@ -163,6 +173,7 @@ public final class MossGiantModule extends SkillModule {
 
     @Override
     public int tick(String method) {
+        method = selectBestCombatMethod(method);
 
         // ── 1. Always eat first if low ────────────────────────────────────────
         if (shouldEat()) {
@@ -227,7 +238,81 @@ public final class MossGiantModule extends SkillModule {
         }
 
         // ── 9. Attack ─────────────────────────────────────────────────────────
+        if (hasBossKey() && BOSS_DOOR_AREA.contains(Players.getLocal())) {
+            return attackBoss();
+        }
         return attack(method);
+    }
+
+    private String selectBestCombatMethod(String method) {
+        if (method == null || method.isEmpty()) {
+            method = "moss_giant_magic";
+        }
+
+        int magicLvl = Skills.getRealLevel(Skill.MAGIC);
+        int rangedLvl = Skills.getRealLevel(Skill.RANGED);
+
+        boolean canMagic = canCastEffectiveSpell(magicLvl);
+        boolean canRange = hasRangedAmmo() && hasRangedWeapon();
+
+        if (canRange && rangedLvl > magicLvl) {
+            return "moss_giant_ranged";
+        }
+        if (canMagic) {
+            return "moss_giant_magic";
+        }
+        if (canRange) {
+            return "moss_giant_ranged";
+        }
+        return method;
+    }
+
+    private boolean hasRangedAmmo() {
+        return Inventory.contains(i -> i != null && i.getName() != null
+                && i.getName().toLowerCase().contains("arrow"));
+    }
+
+    private boolean hasRangedWeapon() {
+        return Inventory.contains(i -> i != null && i.getName() != null && (
+                i.getName().toLowerCase().contains("bow")
+             || i.getName().toLowerCase().contains("ark")
+             || i.getName().toLowerCase().contains("shortbow")
+             || i.getName().toLowerCase().contains("longbow")));
+    }
+
+    private boolean hasMagicRunes() {
+        return canCastEffectiveSpell(Skills.getRealLevel(Skill.MAGIC));
+    }
+
+    private boolean canCastEffectiveSpell(int magicLvl) {
+        if (magicLvl >= 45) {
+            return hasRunes("Fire rune", "Air rune", "Chaos rune");
+        }
+        if (magicLvl >= 35) {
+            return hasRunes("Earth rune", "Air rune");
+        }
+        if (magicLvl >= 29) {
+            return hasRunes("Water rune", "Air rune");
+        }
+        if (magicLvl >= 23) {
+            return hasRunes("Wind rune", "Air rune");
+        }
+        if (magicLvl >= 13) {
+            return hasRunes("Fire rune", "Air rune", "Mind rune");
+        }
+        if (magicLvl >= 5) {
+            return hasRunes("Water rune", "Air rune", "Mind rune");
+        }
+        return hasRunes("Wind rune", "Air rune", "Mind rune");
+    }
+
+    private boolean hasRunes(String... runes) {
+        for (String rune : runes) {
+            if (!Inventory.contains(rune)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -697,31 +782,73 @@ public final class MossGiantModule extends SkillModule {
     }
 
     private int attackBoss() {
-        if (inCombat()) {
-            return Calculations.random(1200, 2200);
+        if (shouldRetreat()) {
+            return retreatFromBoss();
         }
 
         if (hasWeaponEquipped("Iron axe") || hasWeaponEquipped("Steel axe")) {
             ensureBossMeleeStyle();
         }
 
-        NPC target = NPCs.closest(n -> n != null
-                && n.getName() != null
-                && BOSS_FIGHT_AREA.contains(n.getTile())
-                && (n.getName().equalsIgnoreCase("Moss giant")
-                 || n.getName().contains("Giant")
-                 || n.getName().contains("Spider")
-                 || n.getName().contains("Skeleton")
-                 || n.getName().contains("Zombie"))
-                && n.getHealthPercent() > 0
-                && !n.isInCombat());
-        if (target != null) {
-            if (clickHelper.tryClick(target, "Attack")) {
+        if (!onSafeSpot()) {
+            Walking.walk(SAFE_SPOT);
+            return Calculations.random(1200, 1800);
+        }
+
+        NPC ad = findBossTarget(false);
+        if (ad != null) {
+            if (clickHelper.tryClick(ad, "Attack")) {
+                return Calculations.random(1800, 2600);
+            }
+            return Calculations.random(700, 1100);
+        }
+
+        NPC boss = findBossTarget(true);
+        if (boss != null) {
+            if (clickHelper.tryClick(boss, "Attack")) {
                 return Calculations.random(1800, 2600);
             }
             return Calculations.random(700, 1100);
         }
         return Calculations.random(700, 1200);
+    }
+
+    private NPC findBossTarget(boolean priorityBoss) {
+        return NPCs.closest(n -> n != null
+                && n.getName() != null
+                && BOSS_FIGHT_AREA.contains(n.getTile())
+                && n.getHealthPercent() > 0
+                && !n.isInCombat()
+                && (priorityBoss ? isBossName(n.getName()) : isAdName(n.getName())));
+    }
+
+    private boolean isBossName(String name) {
+        String normalized = name.toLowerCase();
+        return normalized.contains("moss giant") || normalized.contains("moss giant boss");
+    }
+
+    private boolean isAdName(String name) {
+        String normalized = name.toLowerCase();
+        return (normalized.contains("spider")
+             || normalized.contains("skeleton")
+             || normalized.contains("zombie")
+             || normalized.contains("rat")
+             || normalized.contains("crawler")
+             || normalized.contains("imp"));
+    }
+
+    private int retreatFromBoss() {
+        if (!BANK_AREA.contains(Players.getLocal())) {
+            Walking.walk(VARROCK_EAST_BANK);
+            return Calculations.random(1800, 2600);
+        }
+        if (!Bank.isOpen()) {
+            Bank.open();
+            return Calculations.random(1200, 2000);
+        }
+        Bank.depositAllItems();
+        Bank.depositAllEquipment();
+        return -(Calculations.random(1200, 2000));
     }
 
     private void ensureBossMeleeStyle() {
