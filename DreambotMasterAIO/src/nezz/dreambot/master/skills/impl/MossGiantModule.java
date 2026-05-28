@@ -1,5 +1,7 @@
 package nezz.dreambot.master.skills.impl;
 
+import nezz.dreambot.master.ge.GESellTask;
+import nezz.dreambot.master.ge.GrandExchangeUtil;
 import nezz.dreambot.master.id.ItemID;
 import nezz.dreambot.master.id.NpcID;
 import nezz.dreambot.master.id.ObjectID;
@@ -98,6 +100,11 @@ public final class MossGiantModule extends SkillModule {
     private static final int  EAT_AT_PCT       = 55;
     /** Rune stack to withdraw per banking trip for each spell tier. */
     private static final int  RUNE_WITHDRAW    = 250;
+    /** Minimum coins in bank before attempting to restock runes at GE. */
+    private static final int  GE_REFILL_COINS  = 15_000;
+    private static final String[] GE_SELL_ITEMS = {
+        "Nature rune", "Chaos rune", "Death rune", "Mithril ore", "Limpwurt root"
+    };
 
     // ── Loot priority list (high → low value) ────────────────────────────────
     private static final String[] LOOT = {
@@ -393,6 +400,9 @@ public final class MossGiantModule extends SkillModule {
              || i.getName().toLowerCase().contains("chaps")
              || i.getName().toLowerCase().contains("vambraces")));
 
+        queueValueLoot();
+        maybeBuyRunesFromGE(method);
+
         // Ensure knife in inventory
         if (!Inventory.contains("Knife") && Bank.contains("Knife")) {
             Bank.withdraw("Knife", 1);
@@ -449,6 +459,78 @@ public final class MossGiantModule extends SkillModule {
                 break;
             }
         }
+    }
+
+    private void queueValueLoot() {
+        for (String item : GE_SELL_ITEMS) {
+            int qty = Bank.count(item);
+            if (qty > 0) {
+                GESellTask.queue(item, qty, 0);
+            }
+        }
+    }
+
+    private void maybeBuyRunesFromGE(String method) {
+        int coins = Bank.contains("Coins") ? Bank.count("Coins") : 0;
+        if (coins < GE_REFILL_COINS || !GrandExchangeUtil.isTradeUnrestricted()) {
+            return;
+        }
+        if (!needsGERefill(method)) {
+            return;
+        }
+
+        if (Bank.isOpen()) {
+            Bank.close();
+            Sleep.sleepUntil(() -> !Bank.isOpen(), 1500);
+        }
+
+        if ("moss_giant_ranged".equals(method)) {
+            for (String arrow : new String[] { "Rune arrow", "Adamant arrow", "Mithril arrow",
+                                               "Steel arrow", "Iron arrow", "Bronze arrow" }) {
+                if (Bank.count(arrow) < RUNE_WITHDRAW) {
+                    GrandExchangeUtil.buyChecked(ItemID.RUNE_ARROW, "Rune arrow", RUNE_WITHDRAW, 0);
+                    break;
+                }
+            }
+        } else {
+            int magicLvl = Skills.getRealLevel(Skill.MAGIC);
+            if (magicLvl >= 45) {
+                if (Bank.count("Fire rune") < RUNE_WITHDRAW)  GrandExchangeUtil.buyChecked(ItemID.FIRE_RUNE,  "Fire rune",  RUNE_WITHDRAW, 0);
+                if (Bank.count("Chaos rune") < RUNE_WITHDRAW / 3) GrandExchangeUtil.buyChecked(ItemID.CHAOS_RUNE, "Chaos rune", RUNE_WITHDRAW / 3, 0);
+                if (Bank.count("Air rune") < RUNE_WITHDRAW / 2)   GrandExchangeUtil.buyChecked(ItemID.AIR_RUNE,   "Air rune",   RUNE_WITHDRAW / 2, 0);
+            } else if (magicLvl >= 13) {
+                if (Bank.count("Fire rune") < RUNE_WITHDRAW) GrandExchangeUtil.buyChecked(ItemID.FIRE_RUNE, "Fire rune",  RUNE_WITHDRAW, 0);
+                if (Bank.count("Air rune") < RUNE_WITHDRAW)  GrandExchangeUtil.buyChecked(ItemID.AIR_RUNE,  "Air rune",   RUNE_WITHDRAW, 0);
+                if (Bank.count("Mind rune") < RUNE_WITHDRAW) GrandExchangeUtil.buyChecked(ItemID.MIND_RUNE, "Mind rune", RUNE_WITHDRAW, 0);
+            } else {
+                if (Bank.count("Air rune") < RUNE_WITHDRAW)  GrandExchangeUtil.buyChecked(ItemID.AIR_RUNE,  "Air rune",  RUNE_WITHDRAW, 0);
+                if (Bank.count("Mind rune") < RUNE_WITHDRAW) GrandExchangeUtil.buyChecked(ItemID.MIND_RUNE, "Mind rune", RUNE_WITHDRAW, 0);
+            }
+        }
+        GrandExchangeUtil.collectAndBank();
+    }
+
+    private boolean needsGERefill(String method) {
+        if ("moss_giant_ranged".equals(method)) {
+            for (String arrow : new String[] { "Rune arrow", "Adamant arrow", "Mithril arrow",
+                                               "Steel arrow", "Iron arrow", "Bronze arrow" }) {
+                if (Bank.count(arrow) < RUNE_WITHDRAW) return true;
+            }
+            return false;
+        }
+        int magicLvl = Skills.getRealLevel(Skill.MAGIC);
+        if (magicLvl >= 45) {
+            return Bank.count("Fire rune") < RUNE_WITHDRAW
+                || Bank.count("Chaos rune") < RUNE_WITHDRAW / 3
+                || Bank.count("Air rune") < RUNE_WITHDRAW / 2;
+        }
+        if (magicLvl >= 13) {
+            return Bank.count("Fire rune") < RUNE_WITHDRAW
+                || Bank.count("Air rune") < RUNE_WITHDRAW
+                || Bank.count("Mind rune") < RUNE_WITHDRAW;
+        }
+        return Bank.count("Air rune") < RUNE_WITHDRAW
+            || Bank.count("Mind rune") < RUNE_WITHDRAW;
     }
 
     /** Find ladder/trapdoor going back up to surface. */
