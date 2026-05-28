@@ -92,7 +92,7 @@ public final class MossGiantModule extends SkillModule {
     private static final Tile TARGET_TILE      = new Tile(3157, 9882, 0);
 
     /** Max distance from SAFE_SPOT to still consider a giant attackable. */
-    private static final int  ATTACK_RADIUS    = 8;
+    private static final int  ATTACK_RADIUS    = 10;
 
     // ── Tuning ────────────────────────────────────────────────────────────────
     private static final int  EAT_AT_PCT       = 55;
@@ -283,7 +283,8 @@ public final class MossGiantModule extends SkillModule {
                 && n.getID() == NpcID.MOSS_GIANT
                 && n.getHealthPercent() > 0
                 && !n.isInCombat()
-                && n.getTile().distance(SAFE_SPOT) <= ATTACK_RADIUS);
+                && GIANT_AREA.contains(n.getTile())
+                && n.hasAction("Attack"));
 
         if (giant == null) {
             // All giants in combat or dead — wait for respawn tick
@@ -511,7 +512,7 @@ public final class MossGiantModule extends SkillModule {
 
     private boolean onSafeSpot() {
         Tile t = Players.getLocal().getTile();
-        return t != null && t.getX() == SAFE_SPOT.getX() && t.getY() == SAFE_SPOT.getY();
+        return t != null && t.distance(SAFE_SPOT) <= 1;
     }
 
     private boolean inCombat() {

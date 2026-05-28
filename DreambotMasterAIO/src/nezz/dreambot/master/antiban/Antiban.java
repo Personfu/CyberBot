@@ -112,6 +112,7 @@ public final class Antiban {
 
         @Override public boolean isReady() {
             if (!profile.cameraJitter && !profile.randomTabs && !profile.afkDrift) return false;
+            if (Players.getLocal().isInCombat() || Players.getLocal().getInteractingCharacter() != null) return false;
             long now = System.currentTimeMillis();
             return now >= nextCameraEvent || now >= nextTabEvent
                     || now >= nextHoverEvent || now >= nextAfkEvent;

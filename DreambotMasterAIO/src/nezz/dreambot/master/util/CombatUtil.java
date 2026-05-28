@@ -1,6 +1,7 @@
 package nezz.dreambot.master.util;
 
 import org.dreambot.api.methods.Calculations;
+import org.dreambot.api.input.Mouse;
 import org.dreambot.api.methods.skills.Skill;
 import org.dreambot.api.methods.skills.Skills;
 import org.dreambot.api.methods.world.World;
@@ -102,6 +103,20 @@ public final class CombatUtil {
                 lastSuccessMs = System.currentTimeMillis();
                 resetWindow();
                 return true;
+            }
+
+            if (npc.isOnScreen()) {
+                try {
+                    java.awt.Point clickPoint = npc.getClickablePoint();
+                    if (clickPoint != null) {
+                        Mouse.move(clickPoint);
+                        sleepNoExc(Calculations.random(50, 120));
+                        Mouse.click(true);
+                        lastSuccessMs = System.currentTimeMillis();
+                        resetWindow();
+                        return true;
+                    }
+                } catch (Throwable ignored) { }
             }
 
             // Haven't clicked yet — check if we've exceeded our patience window
