@@ -25,6 +25,8 @@ public final class GESellTask extends Task {
     /** Global sell queue — item name → (qty, price). */
     private static final Map<String, int[]> SELL_QUEUE = new LinkedHashMap<>();
     private static final int MIN_STACK = 20; // don't bother unless we have ≥N of an item
+    private static final int HIGH_VALUE_MIN_STACK = 5; // smaller threshold for expensive drops
+    private static final int MIN_TOTAL_VALUE = 2_000; // sell if queued value exceeds this
 
     private final Logger log;
 
@@ -51,10 +53,14 @@ public final class GESellTask extends Task {
     @Override public boolean isReady() {
         // Can't trade until 100 ttl + 10 QP + 1200 minutes played
         if (!GrandExchangeUtil.isTradeUnrestricted()) return false;
-        // Ready when queue has something big enough to bother with
         if (SELL_QUEUE.isEmpty()) return false;
-        for (int[] v : SELL_QUEUE.values()) {
-            if (v[0] >= MIN_STACK) return true;
+        for (Map.Entry<String, int[]> entry : SELL_QUEUE.entrySet()) {
+            String name = entry.getKey();
+            int qty = entry.getValue()[0];
+            int price = entry.getValue()[1];
+            if (qty >= MIN_STACK) return true;
+            if (isHighValueItem(name) && qty >= HIGH_VALUE_MIN_STACK) return true;
+            if (price > 0 && qty * price >= MIN_TOTAL_VALUE) return true;
         }
         return false;
     }
@@ -91,5 +97,14 @@ public final class GESellTask extends Task {
     }
 
     @Override public String label() { return "GE-sell[" + SELL_QUEUE.size() + " items queued]"; }
+
+    private static boolean isHighValueItem(String itemName) {
+        return "Nature rune".equalsIgnoreCase(itemName)
+            || "Chaos rune".equalsIgnoreCase(itemName)
+            || "Death rune".equalsIgnoreCase(itemName)
+            || "Mithril ore".equalsIgnoreCase(itemName)
+            || "Limpwurt root".equalsIgnoreCase(itemName)
+            || "Cosmic rune".equalsIgnoreCase(itemName);
+    }
 }
 

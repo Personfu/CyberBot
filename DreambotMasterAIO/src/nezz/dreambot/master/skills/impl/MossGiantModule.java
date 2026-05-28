@@ -12,6 +12,8 @@ import org.dreambot.api.methods.combat.Combat;
 import org.dreambot.api.methods.combat.CombatStyle;
 import org.dreambot.api.methods.container.impl.Inventory;
 import org.dreambot.api.methods.container.impl.bank.Bank;
+import org.dreambot.api.methods.container.impl.equipment.Equipment;
+import org.dreambot.api.methods.container.impl.equipment.EquipmentSlot;
 import org.dreambot.api.methods.interactive.GameObjects;
 import org.dreambot.api.methods.item.GroundItems;
 import org.dreambot.api.methods.interactive.NPCs;
@@ -23,6 +25,7 @@ import org.dreambot.api.methods.map.Tile;
 import org.dreambot.api.methods.skills.Skill;
 import org.dreambot.api.methods.skills.Skills;
 import org.dreambot.api.methods.walking.impl.Walking;
+import org.dreambot.api.utilities.Sleep;
 import org.dreambot.api.wrappers.interactive.GameObject;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.items.GroundItem;
@@ -92,6 +95,7 @@ public final class MossGiantModule extends SkillModule {
 
     /** Approximate spawn centre — giants cluster west/NW of the safe-spot. */
     private static final Tile TARGET_TILE      = new Tile(3157, 9882, 0);
+    private static final Area GIANT_AREA       = new Area(3148, 9870, 3185, 9910, 0);
 
     /** Max distance from SAFE_SPOT to still consider a giant attackable. */
     private static final int  ATTACK_RADIUS    = 10;
@@ -111,6 +115,19 @@ public final class MossGiantModule extends SkillModule {
         "Mossy key", "Nature rune", "Chaos rune", "Death rune", "Mithril ore",
         "Limpwurt root", "Herb seed", "Coins", "Big bones"
     };
+
+    private static final String BOSS_KEY = "Mossy key";
+    private static final Tile BOSS_DOOR_CENTER = new Tile(3163, 9880, 0);
+    private static final Area BOSS_DOOR_AREA = new Area(3156, 9872, 3175, 9892, 0);
+    private static final Area BOSS_FIGHT_AREA = new Area(3150, 9860, 3185, 9895, 0);
+    private static final int RETREAT_HP_PCT = 55;
+    private static final String[] BOSS_ARMOR_CHEST = { "Steel platebody", "Iron platebody" };
+    private static final String[] BOSS_ARMOR_LEGS  = { "Steel platelegs", "Iron platelegs" };
+    private static final String[] BOSS_ARMOR_HEAD  = { "Steel full helm", "Iron full helm" };
+    private static final String[] BOSS_ARMOR_SHIELD = { "Steel kiteshield", "Iron kiteshield" };
+    private static final String[] BOSS_WEAPONS = { "Iron axe", "Steel axe" };
+    private static final int BOSS_GEAR_MAX_BUY_PRICE = 5_000;
+    private static final int BOSS_GEAR_GE_BUFF_COINS = 10_000;
 
     // ── State ─────────────────────────────────────────────────────────────────
     /** Whether we are currently on a banking run. */
@@ -153,19 +170,32 @@ public final class MossGiantModule extends SkillModule {
             return Calculations.random(400, 800);
         }
 
-        // ── 2. Banking loop ───────────────────────────────────────────────────
-        if (banking || needsBank(method)) {
-            banking = true;
-            int result = handleBank(method);
-            if (result < 0) {
-                banking = false; // bank done — head back
+        // ── 2. Boss key / banking loop ─────────────────────────────────────────
+        if (hasBossKey()) {
+            if (shouldRetreat()) {
+                banking = true;
+                int result = handleBank(method);
+                if (result < 0) banking = false;
+                return Math.abs(result);
             }
-            return Math.abs(result);
+            if (banking || needsBank(method)) {
+                banking = true;
+                int result = handleBank(method);
+                if (result < 0) {
+                    banking = false; // bank done — head back
+                }
+                return Math.abs(result);
+            }
         }
 
         // ── 3. Navigate to sewer if not already underground ───────────────────
         if (!SEWER_AREA.contains(Players.getLocal())) {
             return descend();
+        }
+
+        if (hasBossKey()) {
+            int bossAction = handleBossKeyPath();
+            if (bossAction > 0) return bossAction;
         }
 
         // ── 4. Reach the Moss Giant back room through cobwebs ─────────────────
@@ -354,6 +384,13 @@ public final class MossGiantModule extends SkillModule {
                 return Calculations.random(800, 1600);
             }
         }
+        // Ensure we always pick up mossy keys from the room if they drop away from the safe spot.
+        GroundItem key = GroundItems.closest(gi -> gi != null
+                && BOSS_KEY.equalsIgnoreCase(gi.getName())
+                && MOSS_ROOM.contains(gi.getTile()));
+        if (key != null && key.interact("Take")) {
+            return Calculations.random(800, 1600);
+        }
         return 0;
     }
 
@@ -390,9 +427,11 @@ public final class MossGiantModule extends SkillModule {
             return Calculations.random(1200, 2000);
         }
 
-        // Deposit loot (keep knife, weapons, armor)
+        // Deposit loot (keep knife, weapons, armor, and boss key)
         Bank.depositAllExcept(i -> i != null && i.getName() != null && (
                 i.getName().equalsIgnoreCase("Knife")
+             || i.getName().equalsIgnoreCase(BOSS_KEY)
+             || i.getName().equalsIgnoreCase("Iron axe")
              || i.getName().toLowerCase().contains("staff")
              || i.getName().toLowerCase().contains("bow")
              || i.getName().toLowerCase().contains("robe")
@@ -402,6 +441,11 @@ public final class MossGiantModule extends SkillModule {
 
         queueValueLoot();
         maybeBuyRunesFromGE(method);
+        prepareBossLoadout();
+        if (!hasBossLoadout()) {
+            maybeBuyBossGearFromGE();
+            prepareBossLoadout();
+        }
 
         // Ensure knife in inventory
         if (!Inventory.contains("Knife") && Bank.contains("Knife")) {
@@ -553,7 +597,9 @@ public final class MossGiantModule extends SkillModule {
     // ─────────────────────────────────────────────────────────────────────────
 
     private boolean needsBank(String method) {
+        if (hasBossKey() && !hasBossLoadout()) return true;
         if (!hasFood()) return true;
+        if (!hasKnife()) return true;
         if ("moss_giant_ranged".equals(method)) {
             return !Inventory.contains(i -> i != null && i.getName() != null
                     && i.getName().toLowerCase().contains("arrow"));
@@ -561,6 +607,37 @@ public final class MossGiantModule extends SkillModule {
         // Need at least one type of rune
         return !Inventory.contains(i -> i != null && i.getName() != null
                 && i.getName().toLowerCase().contains("rune"));
+    }
+
+    private boolean hasBossKey() {
+        return Inventory.contains(BOSS_KEY);
+    }
+
+    private boolean hasBossLoadout() {
+        return Inventory.contains(i -> i != null && i.getName() != null
+                && (i.getName().equalsIgnoreCase("Iron axe") || i.getName().equalsIgnoreCase("Steel axe")))
+            && hasAnyArmorForBoss()
+            && hasFood();
+    }
+
+    private boolean hasAnyArmorForBoss() {
+        return Inventory.contains(i -> i != null && i.getName() != null && (
+                matchesAny(i.getName(), BOSS_ARMOR_CHEST)
+             || matchesAny(i.getName(), BOSS_ARMOR_LEGS)
+             || matchesAny(i.getName(), BOSS_ARMOR_HEAD)
+             || matchesAny(i.getName(), BOSS_ARMOR_SHIELD)));
+    }
+
+    private boolean matchesAny(String name, String[] options) {
+        for (String option : options) {
+            if (option.equalsIgnoreCase(name)) return true;
+        }
+        return false;
+    }
+
+    private boolean hasKnife() {
+        return Inventory.contains(i -> i != null && i.getName() != null
+                && i.getName().equalsIgnoreCase("Knife"));
     }
 
     private boolean hasFood() {
@@ -574,10 +651,177 @@ public final class MossGiantModule extends SkillModule {
              || i.getName().equalsIgnoreCase("Bread")));
     }
 
+    private boolean shouldRetreat() {
+        int hp = Players.getLocal().getHealthPercent();
+        return hp > 0 && hp < RETREAT_HP_PCT;
+    }
+
+    private int handleBossKeyPath() {
+        GameObject bossDoor = findBossDoor();
+        if (bossDoor != null) {
+            if (useKeyOnDoor(bossDoor)) {
+                return Calculations.random(1800, 2400);
+            }
+        }
+
+        if (!BOSS_DOOR_AREA.contains(Players.getLocal())) {
+            Walking.walk(BOSS_DOOR_CENTER);
+            return Calculations.random(1400, 2200);
+        }
+
+        if (!onSafeSpot()) {
+            Walking.walk(SAFE_SPOT);
+            return Calculations.random(1200, 1800);
+        }
+
+        return attackBoss();
+    }
+
+    private GameObject findBossDoor() {
+        return GameObjects.closest(g -> g != null
+                && BOSS_DOOR_AREA.contains(g.getTile())
+                && ("Door".equalsIgnoreCase(g.getName())
+                 || "Gate".equalsIgnoreCase(g.getName())
+                 || "Mossy door".equalsIgnoreCase(g.getName()))
+                && (g.hasAction("Unlock") || g.hasAction("Open") || g.hasAction("Use")));
+    }
+
+    private boolean useKeyOnDoor(GameObject door) {
+        Item key = Inventory.get(BOSS_KEY);
+        if (key == null) return false;
+        if (key.interact("Use")) {
+            return door.interact(door.hasAction("Unlock") ? "Unlock"
+                    : door.hasAction("Open") ? "Open" : "Use");
+        }
+        return false;
+    }
+
+    private int attackBoss() {
+        if (inCombat()) {
+            return Calculations.random(1200, 2200);
+        }
+
+        if (hasWeaponEquipped("Iron axe") || hasWeaponEquipped("Steel axe")) {
+            ensureBossMeleeStyle();
+        }
+
+        NPC target = NPCs.closest(n -> n != null
+                && n.getName() != null
+                && BOSS_FIGHT_AREA.contains(n.getTile())
+                && (n.getName().equalsIgnoreCase("Moss giant")
+                 || n.getName().contains("Giant")
+                 || n.getName().contains("Spider")
+                 || n.getName().contains("Skeleton")
+                 || n.getName().contains("Zombie"))
+                && n.getHealthPercent() > 0
+                && !n.isInCombat());
+        if (target != null) {
+            if (clickHelper.tryClick(target, "Attack")) {
+                return Calculations.random(1800, 2600);
+            }
+            return Calculations.random(700, 1100);
+        }
+        return Calculations.random(700, 1200);
+    }
+
+    private void ensureBossMeleeStyle() {
+        if (Combat.getCombatStyle() != CombatStyle.STRENGTH) {
+            Combat.setCombatStyle(CombatStyle.STRENGTH);
+        }
+    }
+
+    private boolean hasWeaponEquipped(String name) {
+        if (Equipment.getItemInSlot(EquipmentSlot.WEAPON.getSlot()) == null) return false;
+        return Equipment.getItemInSlot(EquipmentSlot.WEAPON.getSlot()).getName().equalsIgnoreCase(name);
+    }
+
+    private void prepareBossLoadout() {
+        withdrawBossGear();
+        equipBossGear();
+    }
+
+    private void withdrawBossGear() {
+        if (!Inventory.contains("Iron axe") && Bank.contains("Iron axe")) {
+            Bank.withdraw("Iron axe", 1);
+        } else {
+            for (String weapon : BOSS_WEAPONS) {
+                if (!Inventory.contains(weapon) && Bank.contains(weapon)) {
+                    Bank.withdraw(weapon, 1);
+                    break;
+                }
+            }
+        }
+        withdrawArmorSet(BOSS_ARMOR_CHEST);
+        withdrawArmorSet(BOSS_ARMOR_LEGS);
+        withdrawArmorSet(BOSS_ARMOR_HEAD);
+        withdrawArmorSet(BOSS_ARMOR_SHIELD);
+    }
+
+    private void withdrawArmorSet(String[] options) {
+        for (String item : options) {
+            if (!Inventory.contains(item) && Bank.contains(item)) {
+                Bank.withdraw(item, 1);
+                return;
+            }
+        }
+    }
+
+    private void maybeBuyBossGearFromGE() {
+        if (!GrandExchangeUtil.isTradeUnrestricted()) {
+            return;
+        }
+        int coins = Bank.contains("Coins") ? Bank.count("Coins") : 0;
+        if (coins < BOSS_GEAR_GE_BUFF_COINS) {
+            return;
+        }
+
+        if (Bank.isOpen()) {
+            Bank.close();
+            Sleep.sleepUntil(() -> !Bank.isOpen(), 1500);
+        }
+
+        if (!GrandExchangeUtil.buyChecked(ItemID.IRON_AXE, "Iron axe", 1, BOSS_GEAR_MAX_BUY_PRICE)) {
+            GrandExchangeUtil.buyChecked(ItemID.STEEL_AXE, "Steel axe", 1, BOSS_GEAR_MAX_BUY_PRICE);
+        }
+
+        // TODO: Add armor buy by item ID if item IDs are available.
+        GrandExchangeUtil.collectAndBank();
+    }
+
+    private void equipBossGear() {
+        if (!hasWeaponEquipped("Iron axe") && Inventory.contains("Iron axe")) {
+            Inventory.interact("Iron axe", "Wield");
+        }
+        for (String item : BOSS_ARMOR_HEAD) {
+            if (Equipment.isSlotEmpty(EquipmentSlot.HEAD.getSlot()) && Inventory.contains(item)) {
+                Inventory.interact(item, "Wear");
+                return;
+            }
+        }
+        for (String item : BOSS_ARMOR_CHEST) {
+            if (Equipment.isSlotEmpty(EquipmentSlot.CHEST.getSlot()) && Inventory.contains(item)) {
+                Inventory.interact(item, "Wear");
+                return;
+            }
+        }
+        for (String item : BOSS_ARMOR_LEGS) {
+            if (Equipment.isSlotEmpty(EquipmentSlot.LEGS.getSlot()) && Inventory.contains(item)) {
+                Inventory.interact(item, "Wear");
+                return;
+            }
+        }
+        for (String item : BOSS_ARMOR_SHIELD) {
+            if (Equipment.isSlotEmpty(EquipmentSlot.SHIELD.getSlot()) && Inventory.contains(item)) {
+                Inventory.interact(item, "Wield");
+                return;
+            }
+        }
+    }
+
     private boolean shouldEat() {
         int max = Skills.getRealLevel(Skill.HITPOINTS);
         int cur = Skills.getBoostedLevel(Skill.HITPOINTS);
-        return cur < max * EAT_AT_PCT / 100;
+        return max > 0 && cur < max * EAT_AT_PCT / 100;
     }
 
     private void eatFood() {
