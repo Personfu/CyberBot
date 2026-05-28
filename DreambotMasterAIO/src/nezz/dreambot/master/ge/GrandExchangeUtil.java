@@ -40,9 +40,9 @@ public final class GrandExchangeUtil {
         // Total level and quest points are the most reliable checks
         if (Skills.getTotalLevel() < 100) return false;
         if (PlayerSettings.getConfig(101) < 10) return false;
-        // Time played: varbit 2511 = minutes in-game. 0 = unread / error → assume ok
+        // Time played: VarClientInt 526 = minutes in-game; 2511 is not the correct config for playtime.
         try {
-            int minutesPlayed = PlayerSettings.getBitValue(2511);
+            int minutesPlayed = PlayerSettings.getConfig(526);
             if (minutesPlayed > 0 && minutesPlayed < 1200) return false;
         } catch (Throwable ignored) { }
         return true;

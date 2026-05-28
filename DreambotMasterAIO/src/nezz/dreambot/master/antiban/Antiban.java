@@ -301,8 +301,6 @@ public final class Antiban {
         }
         // Scale AFK duration by this account's idleness tendency
         ms = (int)(ms * afkTendency);
-        // Scale AFK duration by this account's idleness tendency
-        ms = (int)(ms * afkTendency);
         log.trace("antiban: afk " + (ms / 1000) + "s");
         sleepNoExc(ms);
     }

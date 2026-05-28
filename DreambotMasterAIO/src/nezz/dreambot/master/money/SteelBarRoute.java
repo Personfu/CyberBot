@@ -57,8 +57,8 @@ public final class SteelBarRoute extends MoneyRoute {
 
     @Override public int tick() {
         switch (state) {
-            case MINE_IRON: return mineOre("Iron rocks", "Iron ore", IRON_NEEDED, State.MINE_COAL, IRON_MINE);
-            case MINE_COAL: return mineOre("Coal rocks", "Coal",     COAL_NEEDED,  State.SMELT,    COAL_MINE);
+            case MINE_IRON: return mineOre("Iron rock", "Iron ore", IRON_NEEDED, State.MINE_COAL, IRON_MINE);
+            case MINE_COAL: return mineOre("Coal rock", "Coal",     COAL_NEEDED,  State.SMELT,    COAL_MINE);
             case SMELT:     return doSmelt();
             case BANKING:   return doBank();
             case SELLING:   return doSell();

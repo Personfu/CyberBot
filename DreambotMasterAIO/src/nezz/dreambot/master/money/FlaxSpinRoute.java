@@ -157,11 +157,10 @@ public final class FlaxSpinRoute extends MoneyRoute {
             Sleep.sleepUntil(Bank::isOpen, 3_000);
         }
         if (Bank.isOpen()) {
-            int strings = Inventory.count("Bow string");
             Bank.depositAllItems();
             Sleep.sleepUntil(Inventory::isEmpty, 2_000);
-            Bank.close();
             int totalStrings = Bank.count("Bow string");
+            Bank.close();
             if (totalStrings >= 500) {
                 state = State.SELLING;
             } else {

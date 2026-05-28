@@ -344,9 +344,12 @@ public final class TutorialTask extends Task {
 
     private void prospect(Tile t) {
         GameObject rock = GameObjects.closest(g -> g != null && "Rocks".equals(g.getName()) && g.getTile().equals(t));
-        if (rock != null && rock.interact("Prospect")) {
-            walkSleep();
-            Sleep.sleepUntil(() -> PlayerSettings.getConfig(Varbits.TUTORIAL_PROGRESS) != PlayerSettings.getConfig(Varbits.TUTORIAL_PROGRESS), 1500);
+        if (rock != null) {
+            int progressBefore = PlayerSettings.getConfig(Varbits.TUTORIAL_PROGRESS);
+            if (rock.interact("Prospect")) {
+                walkSleep();
+                Sleep.sleepUntil(() -> PlayerSettings.getConfig(Varbits.TUTORIAL_PROGRESS) != progressBefore, 1500);
+            }
         }
     }
 
