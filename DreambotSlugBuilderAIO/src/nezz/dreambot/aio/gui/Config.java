@@ -26,7 +26,8 @@ public class Config {
 	public enum Activity {
 		MONEY("Money Making"),
 		BOSS("Bossing"),
-		MONSTERS("Monsters (Training / F2P Money)");
+		MONSTERS("Monsters (Training / F2P Money)"),
+		COMBAT_TRAINER("Combat Trainer (Auto-Progression)");
 
 		private final String label;
 		Activity(String label) { this.label = label; }
@@ -73,6 +74,11 @@ public class Config {
 	public boolean monsterSafespot = true;
 	public int monsterLootValue = 200;
 	public boolean useFoodForMonsters = true;
+
+	/* ---- Combat Trainer ---- */
+	public boolean useFoodForCombatTrainer = true;
+	public boolean combatTrainerSafespot = false;
+	public int combatTrainerLootValue = 100;
 
 	/* ---- Antiban ---- */
 	public boolean antibanEnabled = true;

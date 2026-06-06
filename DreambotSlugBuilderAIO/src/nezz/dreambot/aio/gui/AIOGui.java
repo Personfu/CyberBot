@@ -28,6 +28,7 @@ public class AIOGui extends JFrame {
 		tabs.addTab("Money", buildMoneyTab(cfg));
 		tabs.addTab("Bossing", buildBossTab(cfg));
 		tabs.addTab("Monsters", buildMonsterTab(cfg));
+		tabs.addTab("Combat Trainer", buildCombatTrainerTab(cfg));
 		tabs.addTab("Antiban", buildAntibanTab(cfg));
 		tabs.addTab("Webhooks", buildWebhookTab(cfg));
 		tabs.addTab("RuneGuard", buildRuneGuardTab(cfg));
@@ -146,6 +147,26 @@ public class AIOGui extends JFrame {
 		JCheckBox food = new JCheckBox("Bank/eat food", cfg.useFoodForMonsters);
 		food.addActionListener(e -> cfg.useFoodForMonsters = food.isSelected());
 		p.add(food);
+		return p;
+	}
+
+	private JPanel buildCombatTrainerTab(Config cfg) {
+		JPanel p = grid();
+		p.add(new JLabel("Auto-picks targets based on your combat level."));
+		p.add(new JLabel("Progression: Chickens -> Cows -> Warriors -> Hill Giants -> ..."));
+
+		JCheckBox food = new JCheckBox("Bank/eat food", cfg.useFoodForCombatTrainer);
+		food.addActionListener(e -> cfg.useFoodForCombatTrainer = food.isSelected());
+		p.add(food);
+
+		JCheckBox safespot = new JCheckBox("Use safespot if available", cfg.combatTrainerSafespot);
+		safespot.addActionListener(e -> cfg.combatTrainerSafespot = safespot.isSelected());
+		p.add(safespot);
+
+		p.add(new JLabel("Min loot value to pick up:"));
+		JSpinner loot = new JSpinner(new SpinnerNumberModel(cfg.combatTrainerLootValue, 0, 1_000_000, 100));
+		loot.addChangeListener(e -> cfg.combatTrainerLootValue = (int) loot.getValue());
+		p.add(loot);
 		return p;
 	}
 

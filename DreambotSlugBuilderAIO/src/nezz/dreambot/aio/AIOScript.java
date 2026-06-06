@@ -2,6 +2,7 @@ package nezz.dreambot.aio;
 
 import nezz.dreambot.aio.antiban.Antiban;
 import nezz.dreambot.aio.boss.BossTask;
+import nezz.dreambot.aio.combat.CombatTrainerTask;
 import nezz.dreambot.aio.gui.AIOGui;
 import nezz.dreambot.aio.gui.Config;
 import nezz.dreambot.aio.money.*;
@@ -92,6 +93,9 @@ public class AIOScript extends AbstractScript {
 		}
 		if (cfg.activity == Config.Activity.MONSTERS) {
 			return new MonsterFarmTask(cfg);
+		}
+		if (cfg.activity == Config.Activity.COMBAT_TRAINER) {
+			return new CombatTrainerTask(cfg);
 		}
 		switch (cfg.module) {
 			case JADE_TRADING_STICKS: return new JadeTradingSticksTask(cfg);
