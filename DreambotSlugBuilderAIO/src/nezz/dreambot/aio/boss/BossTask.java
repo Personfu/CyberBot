@@ -1,6 +1,10 @@
 package nezz.dreambot.aio.boss;
 
+import nezz.dreambot.aio.combat.CombatManager;
 import nezz.dreambot.aio.gui.Config;
+import nezz.dreambot.aio.movement.MovementManager;
+import nezz.dreambot.aio.prayer.PrayerManager;
+import nezz.dreambot.aio.supplies.SupplyManager;
 import nezz.dreambot.aio.task.StatsProvider;
 import nezz.dreambot.aio.task.Task;
 import nezz.dreambot.aio.util.PriceTracker;
@@ -8,44 +12,40 @@ import org.dreambot.api.Client;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.container.impl.Bank;
 import org.dreambot.api.methods.container.impl.Inventory;
-import org.dreambot.api.methods.interactive.NPCs;
-import org.dreambot.api.methods.interactive.Players;
-import org.dreambot.api.methods.prayer.Prayer;
-import org.dreambot.api.methods.prayer.Prayers;
-import org.dreambot.api.methods.skills.Skill;
-import org.dreambot.api.methods.skills.Skills;
-import org.dreambot.api.methods.walking.impl.Walking;
+import org.dreambot.api.methods.interactive.GroundItems;
 import org.dreambot.api.utilities.Logger;
 import org.dreambot.api.utilities.Sleep;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.items.GroundItem;
-import org.dreambot.api.methods.interactive.GroundItems;
-import org.dreambot.api.wrappers.items.Item;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Generic, server-agnostic boss fighter. Drives a small state machine:
+ * Generic, subsystem-driven boss fighter. Orchestrates the PRO managers:
+ * movement (travel + run/stamina), prayer (overhead protection + offensive),
+ * supplies (eat/restore/boost) and combat (target + special attack), plus
+ * valuable ground looting and bank restocking.
  *
- *   RESTOCK  -> bank, withdraw food, return to the arena
- *   TRAVEL   -> walk to the boss anchor tile until the named boss is reachable
- *   FIGHT    -> manage HP (eat), prayer (optional protect-from-melee flick),
- *               attack the boss and any adds, then loot valuable ground items
- *
- * Bosses are targeted by name via {@link BossConfig}, so no server-specific
- * numeric NPC IDs are needed. Loot is valued live off the GE for profit stats.
+ * State machine:
+ *   RESTOCK -> bank, withdraw food, return
+ *   TRAVEL  -> web-walk to the anchor until the named boss is reachable
+ *   FIGHT   -> survival -> prayer -> loot -> attack (boss, then adds)
  */
 public class BossTask extends Task implements StatsProvider {
 
 	private final Config cfg;
 	private final BossConfig boss;
 
+	private final MovementManager movement = new MovementManager();
+	private final PrayerManager prayer = new PrayerManager();
+	private final CombatManager combat = new CombatManager();
+	private final SupplyManager supplies;
+
+	private final Map<String, PriceTracker> priceCache = new HashMap<>();
 	private int kills = 0;
 	private int lootValue = 0;
-	private final Map<String, PriceTracker> priceCache = new HashMap<>();
-
+	private boolean killCredited = false;
 	private State state = State.FIGHT;
 
 	private enum State { RESTOCK, TRAVEL, FIGHT }
@@ -53,6 +53,7 @@ public class BossTask extends Task implements StatsProvider {
 	public BossTask(Config cfg) {
 		this.cfg = cfg;
 		this.boss = BossRegistry.forType(cfg);
+		this.supplies = new SupplyManager(cfg.foodName, cfg.eatAtHpPercent);
 	}
 
 	@Override
@@ -70,6 +71,7 @@ public class BossTask extends Task implements StatsProvider {
 		if (!Client.isLoggedIn())
 			return Calculations.random(300, 500);
 
+		movement.tickEnergy();
 		state = resolveState();
 		switch (state) {
 			case RESTOCK: return restock();
@@ -80,37 +82,25 @@ public class BossTask extends Task implements StatsProvider {
 	}
 
 	private State resolveState() {
-		if (outOfFood()) {
-			return State.RESTOCK;
-		}
-		NPC target = NPCs.closest(boss.npcName);
-		if (target == null || !target.exists()) {
-			return State.TRAVEL;
-		}
+		if (!supplies.hasFood()) return State.RESTOCK;
+		NPC target = combat.findByName(boss.npcName);
+		if (target == null || !target.exists()) return State.TRAVEL;
 		return State.FIGHT;
-	}
-
-	private boolean outOfFood() {
-		return !Inventory.contains(cfg.foodName);
 	}
 
 	/* ---------------- RESTOCK ---------------- */
 
 	private int restock() {
-		if (Prayers.isActive(Prayer.PROTECT_FROM_MELEE)) {
-			Prayers.toggle(false, Prayer.PROTECT_FROM_MELEE);
-		}
+		prayer.disableAll();
 		if (!Bank.isOpen()) {
-			if (boss.bankTile != null && boss.bankTile.distance() > 6) {
-				Walking.walk(boss.bankTile);
-				Sleep.sleepUntil(() -> boss.bankTile.distance() < 6 || Bank.isOpen(), 6000);
+			if (movement.walkTo(boss.bankTile, 6)) {
 				return Calculations.random(300, 600);
 			}
 			Bank.open();
 			Sleep.sleepUntil(Bank::isOpen, 5000);
 			return Calculations.random(300, 600);
 		}
-		Bank.depositAllExcept(item -> item != null && isGear(item.getName()));
+		Bank.depositAllExcept(item -> item != null && isKeepable(item.getName()));
 		Sleep.sleep(Calculations.random(150, 300));
 		if (!Bank.contains(cfg.foodName)) {
 			Logger.log("[Boss] No '" + cfg.foodName + "' in bank - stopping.");
@@ -123,10 +113,11 @@ public class BossTask extends Task implements StatsProvider {
 		return Calculations.random(300, 600);
 	}
 
-	/** Keep worn-style items if they somehow end up in inventory; food handled separately. */
-	private boolean isGear(String n) {
+	/** Keep worn-style gear and potions in inventory when banking. */
+	private boolean isKeepable(String n) {
 		if (n == null) return false;
 		String l = n.toLowerCase();
+		if (l.contains("potion") || l.contains("brew") || l.contains("restore")) return true;
 		return l.contains("rune") || l.contains("dragon") || l.contains("amulet")
 				|| l.contains("ring") || l.contains("cape") || l.contains("boots")
 				|| l.contains("gloves") || l.contains("shield") || l.contains("scimitar")
@@ -137,95 +128,75 @@ public class BossTask extends Task implements StatsProvider {
 
 	private int travel() {
 		if (boss.anchorTile == null) {
-			Logger.log("[Boss] No anchor tile configured for " + boss.displayName);
+			Logger.log("[Boss] No anchor tile for " + boss.displayName);
 			return Calculations.random(800, 1200);
 		}
-		if (boss.anchorTile.distance() > 4) {
-			Walking.walk(boss.anchorTile);
-			Sleep.sleepUntil(() -> boss.anchorTile.distance() < 5
-					|| NPCs.closest(boss.npcName) != null, 6000);
-		}
+		movement.walkTo(boss.anchorTile, 4);
 		return Calculations.random(300, 600);
 	}
 
 	/* ---------------- FIGHT ---------------- */
 
 	private int fight() {
-		// 1) Survival first.
-		if (shouldEat()) {
-			eat();
-			return Calculations.random(150, 400);
+		// 1) Survival.
+		if (supplies.eatIfNeeded()) return Calculations.random(150, 400);
+		supplies.restorePrayerIfNeeded(10);
+		supplies.boostIfAvailable(boss.offensiveStyle);
+
+		// 2) Prayer: protection (flick-capable) + offensive upkeep.
+		if (cfg.flickProtectMelee && prayer.points() > 0) {
+			prayer.setProtection(boss.protection);
+			prayer.enableOffensive(boss.offensiveStyle);
 		}
-		// 2) Prayer flick (optional).
-		if (cfg.flickProtectMelee && Prayers.getPoints() > 0
-				&& !Prayers.isActive(Prayer.PROTECT_FROM_MELEE)) {
-			Prayers.toggle(true, Prayer.PROTECT_FROM_MELEE);
-		}
-		// 3) Loot anything valuable lying around between hits.
-		if (lootGround()) {
-			return Calculations.random(150, 350);
-		}
-		// 4) Attack the boss, falling back to adds.
-		NPC target = NPCs.closest(n -> n != null && boss.npcName.equals(n.getName())
-				&& n.hasAction("Attack"));
-		if (target == null) {
-			// Adds (e.g. axe-throwers) - attack the nearest attackable NPC in the arena.
-			target = NPCs.closest(n -> n != null && n.hasAction("Attack")
+
+		// 3) Loot anything valuable between hits.
+		if (lootGround()) return Calculations.random(150, 350);
+
+		// 4) Special attack burst when ready.
+		combat.useSpecialIfReady(Calculations.random(50, 75));
+
+		// 5) Attack boss, then adds.
+		NPC target = combat.findByName(boss.npcName);
+		if (target == null && boss.hasAdds) {
+			target = combat.find(n -> n != null && n.hasAction("Attack")
 					&& n.distance() < 8 && n.getHealthPercent() > 0);
 		}
 		if (target != null) {
-			if (!Players.getLocal().isInCombat()) {
-				final NPC t = target;
-				if (target.interact("Attack")) {
-					Sleep.sleepUntil(() -> Players.getLocal().isInCombat() || !t.exists(), 2500);
-				}
-			} else if (target.getHealthPercent() <= 0 || !target.exists()) {
-				kills++;
+			killCredited = false;
+			if (combat.attack(target)) {
+				return Calculations.random(400, 800);
 			}
-			return Calculations.random(400, 800);
+			return Calculations.random(300, 600);
+		}
+
+		// No target and we were just fighting => a kill likely completed.
+		if (!killCredited && !combat.inCombat()) {
+			kills++;
+			killCredited = true;
 		}
 		return Calculations.random(300, 600);
-	}
-
-	private boolean shouldEat() {
-		int cur = Skills.getBoostedLevel(Skill.HITPOINTS);
-		int max = Skills.getRealLevel(Skill.HITPOINTS);
-		if (max <= 0) return false;
-		int pct = (cur * 100) / max;
-		return pct <= cfg.eatAtHpPercent && Inventory.contains(cfg.foodName);
-	}
-
-	private void eat() {
-		Item food = Inventory.get(cfg.foodName);
-		if (food != null) {
-			food.interact("Eat");
-			Sleep.sleep(Calculations.random(300, 600));
-		}
 	}
 
 	private boolean lootGround() {
 		GroundItem loot = GroundItems.closest(gi -> {
 			if (gi == null || gi.getName() == null) return false;
 			if (gi.distance() > 6) return false;
-			return valueOf(gi.getName()) >= cfg.minLootValue || isGear(gi.getName());
+			return valueOf(gi.getName()) >= cfg.minLootValue || isKeepable(gi.getName());
 		});
 		if (loot == null) return false;
-		if (Inventory.isFull() && !Inventory.contains(loot.getName())) {
-			return false; // no room for a new stack
-		}
+		if (Inventory.isFull() && !Inventory.contains(loot.getName())) return false;
 		String n = loot.getName();
-		int amt = loot.getAmount();
+		int amt = Math.max(1, loot.getAmount());
 		if (loot.interact("Take")) {
 			Sleep.sleep(Calculations.random(300, 600));
-			lootValue += valueOf(n) * Math.max(1, amt);
+			lootValue += valueOf(n) * amt;
 			return true;
 		}
 		return false;
 	}
 
 	private int valueOf(String itemName) {
-		PriceTracker pt = priceCache.computeIfAbsent(itemName, PriceTracker::new);
-		return pt.getPrice();
+		return priceCache.computeIfAbsent(itemName, PriceTracker::new).getPrice();
 	}
 
 	@Override
