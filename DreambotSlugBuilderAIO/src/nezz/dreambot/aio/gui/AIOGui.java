@@ -101,6 +101,15 @@ public class AIOGui extends JFrame {
 		loot.addChangeListener(e -> cfg.minLootValue = (int) loot.getValue());
 		p.add(loot);
 
+		p.add(new JLabel("Gear loadout (comma-separated, optional):"));
+		JTextField gear = new JTextField(cfg.gearLoadout);
+		gear.addFocusListener(new java.awt.event.FocusAdapter() {
+			public void focusLost(java.awt.event.FocusEvent e) {
+				cfg.gearLoadout = gear.getText().trim();
+			}
+		});
+		p.add(gear);
+
 		JCheckBox flick = new JCheckBox("Flick Protect from Melee", cfg.flickProtectMelee);
 		flick.addActionListener(e -> cfg.flickProtectMelee = flick.isSelected());
 		p.add(flick);

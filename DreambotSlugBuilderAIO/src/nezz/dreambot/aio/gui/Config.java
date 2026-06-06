@@ -18,6 +18,8 @@ public class Config {
 	public String bossNameOverride = "";   // optional: override the NPC name to target
 	public String foodName = "Shark";
 	public int eatAtHpPercent = 50;
+	/** Comma-separated equipment item names to keep equipped during the fight. */
+	public String gearLoadout = "";
 	public boolean flickProtectMelee = true;
 	public int minLootValue = 1000;        // only pick up ground loot worth >= this
 

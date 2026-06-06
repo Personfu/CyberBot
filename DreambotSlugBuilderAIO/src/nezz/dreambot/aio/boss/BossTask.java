@@ -3,6 +3,7 @@ package nezz.dreambot.aio.boss;
 import nezz.dreambot.aio.boss.mechanic.BossMechanic;
 import nezz.dreambot.aio.boss.mechanic.Mechanics;
 import nezz.dreambot.aio.combat.CombatManager;
+import nezz.dreambot.aio.gear.GearManager;
 import nezz.dreambot.aio.gui.Config;
 import nezz.dreambot.aio.movement.MovementManager;
 import nezz.dreambot.aio.prayer.PrayerManager;
@@ -44,6 +45,8 @@ public class BossTask extends Task implements StatsProvider {
 	private final CombatManager combat = new CombatManager();
 	private final SupplyManager supplies;
 	private final BossMechanic mechanic;
+	private final GearManager gear = new GearManager();
+	private final GearManager.GearSet loadout;
 
 	private final Map<String, PriceTracker> priceCache = new HashMap<>();
 	private int kills = 0;
@@ -58,6 +61,18 @@ public class BossTask extends Task implements StatsProvider {
 		this.boss = BossRegistry.forType(cfg);
 		this.supplies = new SupplyManager(cfg.foodName, cfg.eatAtHpPercent);
 		this.mechanic = Mechanics.forBoss(cfg, boss, combat);
+		this.loadout = parseLoadout(cfg.gearLoadout);
+	}
+
+	private GearManager.GearSet parseLoadout(String csv) {
+		if (csv == null || csv.trim().isEmpty()) return null;
+		String[] parts = csv.split(",");
+		java.util.List<String> items = new java.util.ArrayList<>();
+		for (String p : parts) {
+			String s = p.trim();
+			if (!s.isEmpty()) items.add(s);
+		}
+		return items.isEmpty() ? null : new GearManager.GearSet("Boss loadout", items);
 	}
 
 	@Override
@@ -142,6 +157,10 @@ public class BossTask extends Task implements StatsProvider {
 	/* ---------------- FIGHT ---------------- */
 
 	private int fight() {
+		// 0) Ensure the configured gear loadout is worn (cheap no-op once equipped).
+		if (loadout != null && !gear.isFullyEquipped(loadout) && gear.equip(loadout)) {
+			return Calculations.random(150, 300);
+		}
 		// 1) Survival.
 		if (supplies.eatIfNeeded()) return Calculations.random(150, 400);
 		supplies.restorePrayerIfNeeded(10);
