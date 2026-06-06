@@ -16,6 +16,10 @@ public final class Mechanics {
 		switch (cfg.boss) {
 			case SCURRIUS:
 				return new ScurriusMechanic(boss, combat);
+			case BRYOPHYTA:
+				return new BryophytaMechanic(boss, combat);
+			case KING_BLACK_DRAGON:
+				return new KBDMechanic(boss, combat);
 			case DERANGED_ARCHAEOLOGIST:
 				return new DerangedArchaeologistMechanic(boss, combat);
 			default:

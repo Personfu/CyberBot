@@ -15,7 +15,9 @@ import org.dreambot.api.Client;
 import org.dreambot.api.methods.Calculations;
 import org.dreambot.api.methods.container.impl.Bank;
 import org.dreambot.api.methods.container.impl.Inventory;
+import org.dreambot.api.methods.interactive.GameObjects;
 import org.dreambot.api.methods.interactive.GroundItems;
+import org.dreambot.api.wrappers.interactive.GameObject;
 import org.dreambot.api.utilities.Logger;
 import org.dreambot.api.utilities.Sleep;
 import org.dreambot.api.wrappers.interactive.NPC;
@@ -146,6 +148,20 @@ public class BossTask extends Task implements StatsProvider {
 	/* ---------------- TRAVEL ---------------- */
 
 	private int travel() {
+		// If the boss relocates to a known object (e.g. Giant Mole -> Mole hills),
+		// walk toward the nearest one so we resurface on top of it.
+		if (boss.relocateObjectName != null) {
+			GameObject hill = GameObjects.closest(boss.relocateObjectName);
+			if (hill != null) {
+				if (hill.distance() > 3) {
+					movement.walkTo(hill.getTile(), 2);
+				} else {
+					hill.interact("Dig");
+					Sleep.sleep(Calculations.random(300, 600));
+				}
+				return Calculations.random(300, 600);
+			}
+		}
 		if (boss.anchorTile == null) {
 			Logger.log("[Boss] No anchor tile for " + boss.displayName);
 			return Calculations.random(800, 1200);

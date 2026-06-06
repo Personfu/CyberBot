@@ -34,10 +34,11 @@ public final class BossRegistry {
 						new Tile(2271, 4680, 0), edgeville,
 						Protect.MAGIC, Skill.STRENGTH, false);
 			case GIANT_MOLE:
+				// The mole burrows and resurfaces at "Mole hills"; relocate to them.
 				return new BossConfig("Giant Mole",
 						name(override, "Giant Mole"),
 						new Tile(1752, 5237, 0), new Tile(3013, 3355, 0),
-						Protect.NONE, Skill.STRENGTH, false);
+						Protect.NONE, Skill.STRENGTH, false, "Mole hills");
 			case CHAOS_ELEMENTAL:
 				return new BossConfig("Chaos Elemental",
 						name(override, "Chaos Elemental"),

@@ -24,9 +24,21 @@ public class BossConfig {
 	public final Skill offensiveStyle;
 	/** Whether the boss has adds worth attacking when the main target is gone. */
 	public final boolean hasAdds;
+	/**
+	 * Optional game-object name the boss relocates to when it leaves (e.g. the
+	 * Giant Mole's "Mole hills" after it burrows). If set, TRAVEL walks toward
+	 * the nearest such object when the boss NPC isn't loaded. May be null.
+	 */
+	public final String relocateObjectName;
 
 	public BossConfig(String displayName, String npcName, Tile anchorTile, Tile bankTile,
 					  PrayerManager.Protect protection, Skill offensiveStyle, boolean hasAdds) {
+		this(displayName, npcName, anchorTile, bankTile, protection, offensiveStyle, hasAdds, null);
+	}
+
+	public BossConfig(String displayName, String npcName, Tile anchorTile, Tile bankTile,
+					  PrayerManager.Protect protection, Skill offensiveStyle, boolean hasAdds,
+					  String relocateObjectName) {
 		this.displayName = displayName;
 		this.npcName = npcName;
 		this.anchorTile = anchorTile;
@@ -34,5 +46,6 @@ public class BossConfig {
 		this.protection = protection;
 		this.offensiveStyle = offensiveStyle;
 		this.hasAdds = hasAdds;
+		this.relocateObjectName = relocateObjectName;
 	}
 }
