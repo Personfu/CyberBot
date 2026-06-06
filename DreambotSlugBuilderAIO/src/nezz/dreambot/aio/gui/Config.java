@@ -27,7 +27,8 @@ public class Config {
 		MONEY("Money Making"),
 		BOSS("Bossing"),
 		MONSTERS("Monsters (Training / F2P Money)"),
-		COMBAT_TRAINER("Combat Trainer (Auto-Progression)");
+		COMBAT_TRAINER("Combat Trainer (Auto-Progression)"),
+		MAGIC("Magic (High Alch / Combat Cast)");
 
 		private final String label;
 		Activity(String label) { this.label = label; }
@@ -79,6 +80,43 @@ public class Config {
 	public boolean useFoodForCombatTrainer = true;
 	public boolean combatTrainerSafespot = false;
 	public int combatTrainerLootValue = 100;
+
+	/* ---- Magic ---- */
+	public MagicMode magicMode = MagicMode.HIGH_ALCH;
+	public String magicAlchItem = "Yew longbow";
+	public String magicSpell = "FIRE_STRIKE";
+	public String magicTargetNpc = "Chicken";
+	public boolean magicSafespot = false;
+	// Optional tiles encoded as "x,y,z"; blank = unset.
+	public String magicSafespotTileStr = "";
+	public String magicAnchorTileStr = "";
+
+	public enum MagicMode {
+		HIGH_ALCH("High Alchemy (item)"),
+		COMBAT_CAST("Combat Cast (NPC)");
+		private final String label;
+		MagicMode(String label) { this.label = label; }
+		@Override public String toString() { return label; }
+	}
+
+	public boolean magicSafespotTileSet() { return parseTile(magicSafespotTileStr) != null; }
+	public boolean magicAnchorTileSet() { return parseTile(magicAnchorTileStr) != null; }
+	public org.dreambot.api.methods.map.Tile magicSafespotTile() { return parseTile(magicSafespotTileStr); }
+	public org.dreambot.api.methods.map.Tile magicAnchorTile() { return parseTile(magicAnchorTileStr); }
+
+	private static org.dreambot.api.methods.map.Tile parseTile(String s) {
+		if (s == null) return null;
+		String[] p = s.trim().split("\\s*,\\s*");
+		if (p.length < 2) return null;
+		try {
+			int x = Integer.parseInt(p[0]);
+			int y = Integer.parseInt(p[1]);
+			int z = p.length >= 3 ? Integer.parseInt(p[2]) : 0;
+			return new org.dreambot.api.methods.map.Tile(x, y, z);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
 
 	/* ---- Antiban ---- */
 	public boolean antibanEnabled = true;
