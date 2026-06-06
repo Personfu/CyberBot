@@ -1,11 +1,13 @@
 package nezz.dreambot.aio;
 
 import nezz.dreambot.aio.antiban.Antiban;
+import nezz.dreambot.aio.boss.BossTask;
 import nezz.dreambot.aio.gui.AIOGui;
 import nezz.dreambot.aio.gui.Config;
 import nezz.dreambot.aio.money.*;
 import nezz.dreambot.aio.paint.Paint;
 import nezz.dreambot.aio.security.RuneGuardClient;
+import nezz.dreambot.aio.task.StatsProvider;
 import nezz.dreambot.aio.task.Task;
 import nezz.dreambot.aio.task.TaskManager;
 import nezz.dreambot.aio.webhook.WebhookManager;
@@ -46,7 +48,8 @@ public class AIOScript extends AbstractScript {
 	private Antiban antiban;
 	private WebhookManager webhook;
 	private RuneGuardClient runeGuard;
-	private MoneyTask activeMoney;
+	private Task activeTask;
+	private StatsProvider stats;
 	private boolean started = false;
 
 	@Override
@@ -57,8 +60,9 @@ public class AIOScript extends AbstractScript {
 			Sleep.sleep(200);
 		}
 
-		activeMoney = buildModule();
-		tasks.add(activeMoney);
+		activeTask = buildModule();
+		stats = (StatsProvider) activeTask;
+		tasks.add(activeTask);
 
 		timer = new Timer();
 		paint = new Paint(timer);
@@ -76,12 +80,15 @@ public class AIOScript extends AbstractScript {
 			runeGuard.start();
 		}
 
-		webhook.send("Slug Builder AIO started", "Module: " + activeMoney.name());
+		webhook.send("Slug Builder AIO started", "Module: " + activeTask.name());
 		started = true;
-		Logger.log("[AIO] Started module: " + activeMoney.name());
+		Logger.log("[AIO] Started module: " + activeTask.name());
 	}
 
-	private MoneyTask buildModule() {
+	private Task buildModule() {
+		if (cfg.activity == Config.Activity.BOSS) {
+			return new BossTask(cfg);
+		}
 		switch (cfg.module) {
 			case JADE_TRADING_STICKS: return new JadeTradingSticksTask(cfg);
 			case APPLE_MUSH: return new AppleMushTask(cfg);
@@ -109,10 +116,10 @@ public class AIOScript extends AbstractScript {
 
 		int result = tasks.loop();
 
-		if (activeMoney != null) {
+		if (stats != null) {
 			webhook.maybeSend("Slug Builder AIO progress",
-					activeMoney.name() + "\n" + activeMoney.getStatus()
-							+ "\nProfit/hr: " + timer.getHourlyRate(activeMoney.getProfit()));
+					activeTask.name() + "\n" + stats.getStatus()
+							+ "\nProfit/hr: " + timer.getHourlyRate(stats.getProfit()));
 		}
 
 		if (result < 0) {
@@ -126,17 +133,16 @@ public class AIOScript extends AbstractScript {
 	@Override
 	public void onPaint(Graphics g) {
 		if (started && paint != null) {
-			paint.render(g, activeMoney, runeGuard);
+			paint.render(g, activeTask, stats, runeGuard);
 		}
 	}
 
 	@Override
 	public void onExit() {
 		tasks.stopAll();
-		if (webhook != null && activeMoney != null) {
+		if (webhook != null && stats != null) {
 			webhook.send("Slug Builder AIO stopped",
-					activeMoney.name() + " | Final profit: "
-							+ (activeMoney != null ? activeMoney.getProfit() : 0));
+					activeTask.name() + " | Final profit: " + stats.getProfit());
 		}
 		if (runeGuard != null) {
 			runeGuard.close();

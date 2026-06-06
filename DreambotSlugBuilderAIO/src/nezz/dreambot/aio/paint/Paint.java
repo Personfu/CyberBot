@@ -1,7 +1,8 @@
 package nezz.dreambot.aio.paint;
 
-import nezz.dreambot.aio.money.MoneyTask;
 import nezz.dreambot.aio.security.RuneGuardClient;
+import nezz.dreambot.aio.task.StatsProvider;
+import nezz.dreambot.aio.task.Task;
 import org.dreambot.api.utilities.Timer;
 
 import java.awt.*;
@@ -18,7 +19,7 @@ public class Paint {
 		this.timer = timer;
 	}
 
-	public void render(Graphics g, MoneyTask task, RuneGuardClient runeGuard) {
+	public void render(Graphics g, Task task, StatsProvider stats, RuneGuardClient runeGuard) {
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 

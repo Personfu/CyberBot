@@ -15,8 +15,18 @@ public class AIOGui extends JFrame {
 		setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(440, 420));
 
+		JPanel top = new JPanel(new GridLayout(0, 1, 4, 4));
+		top.setBorder(BorderFactory.createEmptyBorder(8, 10, 0, 10));
+		top.add(new JLabel("Activity:"));
+		JComboBox<Config.Activity> activity = new JComboBox<>(Config.Activity.values());
+		activity.setSelectedItem(cfg.activity);
+		activity.addActionListener(e -> cfg.activity = (Config.Activity) activity.getSelectedItem());
+		top.add(activity);
+		add(top, BorderLayout.NORTH);
+
 		JTabbedPane tabs = new JTabbedPane();
 		tabs.addTab("Money", buildMoneyTab(cfg));
+		tabs.addTab("Bossing", buildBossTab(cfg));
 		tabs.addTab("Antiban", buildAntibanTab(cfg));
 		tabs.addTab("Webhooks", buildWebhookTab(cfg));
 		tabs.addTab("RuneGuard", buildRuneGuardTab(cfg));
@@ -52,6 +62,48 @@ public class AIOGui extends JFrame {
 		JSpinner stock = new JSpinner(new SpinnerNumberModel(cfg.soulRunesMinStock, 0, 250, 10));
 		stock.addChangeListener(e -> cfg.soulRunesMinStock = (int) stock.getValue());
 		p.add(stock);
+		return p;
+	}
+
+	private JPanel buildBossTab(Config cfg) {
+		JPanel p = grid();
+		p.add(new JLabel("Boss:"));
+		JComboBox<Config.BossType> box = new JComboBox<>(Config.BossType.values());
+		box.setSelectedItem(cfg.boss);
+		box.addActionListener(e -> cfg.boss = (Config.BossType) box.getSelectedItem());
+		p.add(box);
+
+		p.add(new JLabel("Boss NPC name override (optional):"));
+		JTextField nameOverride = new JTextField(cfg.bossNameOverride);
+		nameOverride.addFocusListener(new java.awt.event.FocusAdapter() {
+			public void focusLost(java.awt.event.FocusEvent e) {
+				cfg.bossNameOverride = nameOverride.getText().trim();
+			}
+		});
+		p.add(nameOverride);
+
+		p.add(new JLabel("Food name:"));
+		JTextField food = new JTextField(cfg.foodName);
+		food.addFocusListener(new java.awt.event.FocusAdapter() {
+			public void focusLost(java.awt.event.FocusEvent e) {
+				cfg.foodName = food.getText().trim();
+			}
+		});
+		p.add(food);
+
+		p.add(new JLabel("Eat at HP %:"));
+		JSpinner eat = new JSpinner(new SpinnerNumberModel(cfg.eatAtHpPercent, 10, 90, 5));
+		eat.addChangeListener(e -> cfg.eatAtHpPercent = (int) eat.getValue());
+		p.add(eat);
+
+		p.add(new JLabel("Min loot value to pick up:"));
+		JSpinner loot = new JSpinner(new SpinnerNumberModel(cfg.minLootValue, 0, 1_000_000, 500));
+		loot.addChangeListener(e -> cfg.minLootValue = (int) loot.getValue());
+		p.add(loot);
+
+		JCheckBox flick = new JCheckBox("Flick Protect from Melee", cfg.flickProtectMelee);
+		flick.addActionListener(e -> cfg.flickProtectMelee = flick.isSelected());
+		p.add(flick);
 		return p;
 	}
 

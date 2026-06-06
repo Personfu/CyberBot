@@ -11,6 +11,13 @@ drop in without touching the engine.
   - Soul Rune shop buyer (Magic Guild / Baba Yaga)
   - Apple Mush (apple press)
   - Fire Shades (Temple Trekking Route 3, first encounter)
+- **Bossing module** (name-based, no server-specific IDs required): Brutus,
+  Varrock Sewers (axe adds), King Black Dragon, Giant Mole, Chaos Elemental,
+  Ivar King of Bones. Handles travel-to-arena, eat-at-HP%, optional Protect
+  from Melee flicking, attacking boss + adds, valuable ground looting, and
+  bank-restock when out of food. Set the boss, food, and an optional NPC-name
+  override in the **Bossing** tab; adjust anchor tiles in `BossRegistry` if the
+  CyberScape 317 coordinates differ.
 - **Antiban** – probability-gated idle behaviours (camera, tab switches, mouse
   moves, reaction pauses)
 - **Discord webhooks** – periodic progress embeds, fail-soft on a daemon thread

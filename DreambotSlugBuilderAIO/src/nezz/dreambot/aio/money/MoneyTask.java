@@ -1,5 +1,6 @@
 package nezz.dreambot.aio.money;
 
+import nezz.dreambot.aio.task.StatsProvider;
 import nezz.dreambot.aio.task.Task;
 
 /**
@@ -7,7 +8,7 @@ import nezz.dreambot.aio.task.Task;
  * registers the single selected module) and exposes profit tracking used by
  * the paint overlay and webhooks.
  */
-public abstract class MoneyTask extends Task {
+public abstract class MoneyTask extends Task implements StatsProvider {
 
 	@Override
 	public boolean accept() {

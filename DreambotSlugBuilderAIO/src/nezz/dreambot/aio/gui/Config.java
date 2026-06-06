@@ -7,8 +7,41 @@ public class Config {
 
 	public volatile boolean started = false;
 
+	/** Top-level activity category. */
+	public Activity activity = Activity.MONEY;
+
 	/** Selected money-making module. */
 	public MoneyModule module = MoneyModule.SOUL_RUNES;
+
+	/* ---- Bossing ---- */
+	public BossType boss = BossType.BRUTUS;
+	public String bossNameOverride = "";   // optional: override the NPC name to target
+	public String foodName = "Shark";
+	public int eatAtHpPercent = 50;
+	public boolean flickProtectMelee = true;
+	public int minLootValue = 1000;        // only pick up ground loot worth >= this
+
+	public enum Activity {
+		MONEY("Money Making"),
+		BOSS("Bossing");
+
+		private final String label;
+		Activity(String label) { this.label = label; }
+		@Override public String toString() { return label; }
+	}
+
+	public enum BossType {
+		BRUTUS("Brutus"),
+		SEWER_AXEMAN("Varrock Sewers (axe adds)"),
+		KING_BLACK_DRAGON("King Black Dragon"),
+		GIANT_MOLE("Giant Mole"),
+		CHAOS_ELEMENTAL("Chaos Elemental"),
+		IVAR_KING_OF_BONES("Ivar, King of Bones");
+
+		private final String label;
+		BossType(String label) { this.label = label; }
+		@Override public String toString() { return label; }
+	}
 
 	/* ---- Module tuning ---- */
 	public int jadesPerWorld = 20;
