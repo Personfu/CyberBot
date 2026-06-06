@@ -1,5 +1,7 @@
 package nezz.dreambot.aio.boss;
 
+import nezz.dreambot.aio.boss.mechanic.BossMechanic;
+import nezz.dreambot.aio.boss.mechanic.Mechanics;
 import nezz.dreambot.aio.combat.CombatManager;
 import nezz.dreambot.aio.gui.Config;
 import nezz.dreambot.aio.movement.MovementManager;
@@ -41,6 +43,7 @@ public class BossTask extends Task implements StatsProvider {
 	private final PrayerManager prayer = new PrayerManager();
 	private final CombatManager combat = new CombatManager();
 	private final SupplyManager supplies;
+	private final BossMechanic mechanic;
 
 	private final Map<String, PriceTracker> priceCache = new HashMap<>();
 	private int kills = 0;
@@ -54,6 +57,7 @@ public class BossTask extends Task implements StatsProvider {
 		this.cfg = cfg;
 		this.boss = BossRegistry.forType(cfg);
 		this.supplies = new SupplyManager(cfg.foodName, cfg.eatAtHpPercent);
+		this.mechanic = Mechanics.forBoss(cfg, boss, combat);
 	}
 
 	@Override
@@ -149,13 +153,17 @@ public class BossTask extends Task implements StatsProvider {
 			prayer.enableOffensive(boss.offensiveStyle);
 		}
 
-		// 3) Loot anything valuable between hits.
+		// 3) Per-boss mechanic hook (dodge specials, minion priority, etc.).
+		int mech = mechanic.handle();
+		if (BossMechanic.handled(mech)) return mech;
+
+		// 4) Loot anything valuable between hits.
 		if (lootGround()) return Calculations.random(150, 350);
 
-		// 4) Special attack burst when ready.
+		// 5) Special attack burst when ready.
 		combat.useSpecialIfReady(Calculations.random(50, 75));
 
-		// 5) Attack boss, then adds.
+		// 6) Attack boss, then adds.
 		NPC target = combat.findByName(boss.npcName);
 		if (target == null && boss.hasAdds) {
 			target = combat.find(n -> n != null && n.hasAction("Attack")

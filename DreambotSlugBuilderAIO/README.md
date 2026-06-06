@@ -90,6 +90,20 @@ RuneGuard dashboard documents a different order, change only
 Supply the signing key (PEM) and script token in the **RuneGuard** tab of the
 GUI. With no key supplied the script runs normally without RuneGuard.
 
+## Per-boss mechanics
+
+Bosses can supply a `BossMechanic` (in `boss/mechanic/`) that runs each fight
+tick before the generic attack logic and can take over when it acts:
+
+- **Scurrius** – clears "Giant rat" minions before resuming the boss (they hit
+  hard and buff Scurrius while alive).
+- **Deranged Archaeologist** – steps off the current tile each ~10s cycle to
+  dodge the "Learn to read!" book AoE. `castImminent()` is an extension point if
+  your build exposes the cast animation/overhead text for tighter timing.
+
+Add a mechanic by extending `BossMechanic` and registering it in
+`Mechanics.forBoss(...)`. Bosses without one get `NoMechanic` (no-op).
+
 ## Extending
 
 Add a class extending `nezz.dreambot.aio.task.Task` (or `money.MoneyTask`),
