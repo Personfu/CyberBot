@@ -1,0 +1,2 @@
+# Keep the RuneGuard client jar tracked; ignore any client.jar dropped here.
+client.jar
