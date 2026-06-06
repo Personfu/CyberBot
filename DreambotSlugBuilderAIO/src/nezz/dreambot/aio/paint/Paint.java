@@ -36,9 +36,11 @@ public class Paint {
 		int y = 66;
 		if (task != null) {
 			g2.drawString("Module: " + task.name(), 14, y); y += 15;
-			g2.drawString(task.getStatus(), 14, y); y += 15;
-			int profit = task.getProfit();
-			g2.drawString("Profit: " + profit + " (" + timer.getHourlyRate(profit) + "/hr)", 14, y); y += 15;
+			if (stats != null) {
+				g2.drawString(stats.getStatus(), 14, y); y += 15;
+				int profit = stats.getProfit();
+				g2.drawString("Profit: " + profit + " (" + timer.getHourlyRate(profit) + "/hr)", 14, y); y += 15;
+			}
 		} else {
 			g2.drawString("Module: idle", 14, y); y += 15;
 		}

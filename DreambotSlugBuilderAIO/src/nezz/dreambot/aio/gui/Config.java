@@ -36,7 +36,11 @@ public class Config {
 		KING_BLACK_DRAGON("King Black Dragon"),
 		GIANT_MOLE("Giant Mole"),
 		CHAOS_ELEMENTAL("Chaos Elemental"),
-		IVAR_KING_OF_BONES("Ivar, King of Bones");
+		IVAR_KING_OF_BONES("Ivar, King of Bones"),
+		SCURRIUS("Scurrius"),
+		OBOR("Obor"),
+		BRYOPHYTA("Bryophyta"),
+		DERANGED_ARCHAEOLOGIST("Deranged Archaeologist");
 
 		private final String label;
 		BossType(String label) { this.label = label; }

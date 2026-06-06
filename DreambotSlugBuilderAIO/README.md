@@ -25,6 +25,20 @@ drop in without touching the engine.
   `com.runeguard.client.Runeguard` client (fail-soft wrapper)
 - **Live profit tracking** – GE-priced profit and GP/hr on the paint overlay
 
+## Verifying locally without the client jar
+
+The project ships with **minimal DreamBot API stubs** under `stubs/` so the
+whole codebase can be type-checked without the proprietary client jar:
+
+```bash
+cd DreambotSlugBuilderAIO
+./build-local.sh          # compiles stubs + project, reports OK or errors
+```
+
+The stubs are signatures only (no behaviour) and are **not** shipped in the
+runnable jar — they exist purely so `javac` can verify the code compiles. The
+runnable script jar is still built against the real client jar (below).
+
 ## Building locally
 
 The DreamBot client jar is **not** redistributable and is not in this repo. The

@@ -1,0 +1,5 @@
+package org.dreambot.api.methods.prayer;
+public enum Prayer {
+  PROTECT_FROM_MELEE, PROTECT_FROM_MAGIC, PROTECT_FROM_MISSILES,
+  PIETY, RIGOUR, AUGURY, EAGLE_EYE, MYSTIC_MIGHT, ULTIMATE_STRENGTH;
+}

@@ -48,6 +48,30 @@ public final class BossRegistry {
 						name(override, "Ivar, King of Bones"),
 						new Tile(3257, 3673, 0), edgeville,
 						Protect.MELEE, Skill.STRENGTH, true);
+			case SCURRIUS:
+				// Rat boss beneath Varrock Palace; squeaking rat minions.
+				return new BossConfig("Scurrius",
+						name(override, "Scurrius"),
+						new Tile(3287, 9851, 0), edgeville,
+						Protect.MELEE, Skill.STRENGTH, true);
+			case OBOR:
+				// Hill Giant boss, Edgeville Dungeon (Giant key).
+				return new BossConfig("Obor",
+						name(override, "Obor"),
+						new Tile(3105, 9933, 0), edgeville,
+						Protect.MELEE, Skill.STRENGTH, false);
+			case BRYOPHYTA:
+				// Moss Giant boss near Varrock entrance (Mossy key).
+				return new BossConfig("Bryophyta",
+						name(override, "Bryophyta"),
+						new Tile(3170, 9882, 0), edgeville,
+						Protect.MELEE, Skill.STRENGTH, false);
+			case DERANGED_ARCHAEOLOGIST:
+				// Fossil Island swamp; ranged attacker, "Learn to read!" AoE.
+				return new BossConfig("Deranged Archaeologist",
+						name(override, "Deranged Archaeologist"),
+						new Tile(3686, 3717, 0), edgeville,
+						Protect.RANGED, Skill.STRENGTH, false);
 			case BRUTUS:
 			default:
 				return new BossConfig("Brutus",
