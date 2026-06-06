@@ -11,6 +11,12 @@ drop in without touching the engine.
   - Soul Rune shop buyer (Magic Guild / Baba Yaga)
   - Apple Mush (apple press)
   - Fire Shades (Temple Trekking Route 3, first encounter)
+- **Monsters module** (training / F2P money, name-based): Hill Giants (big
+  bones, limpwurt), Chaos Druids (grimy herbs), Green Dragons (bones, hides),
+  Moss Giants (big bones, keys), Lesser Demons (magic safespot). Travels,
+  optionally holds a safespot tile, loots a named drop list plus a GE value
+  threshold, and banks junk while keeping food/gear. Magic targets rely on your
+  configured autocast (attacking the NPC fires it).
 - **Bossing module** (name-based, no server-specific IDs required): Brutus,
   Varrock Sewers (axe adds), King Black Dragon, Giant Mole, Chaos Elemental,
   Ivar King of Bones. Handles travel-to-arena, eat-at-HP%, optional Protect

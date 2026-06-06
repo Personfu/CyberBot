@@ -25,10 +25,23 @@ public class Config {
 
 	public enum Activity {
 		MONEY("Money Making"),
-		BOSS("Bossing");
+		BOSS("Bossing"),
+		MONSTERS("Monsters (Training / F2P Money)");
 
 		private final String label;
 		Activity(String label) { this.label = label; }
+		@Override public String toString() { return label; }
+	}
+
+	public enum MonsterTarget {
+		HILL_GIANTS("Hill Giants (big bones, limpwurt)"),
+		CHAOS_DRUIDS("Chaos Druids (grimy herbs)"),
+		GREEN_DRAGONS("Green Dragons (bones, hides)"),
+		MOSS_GIANTS("Moss Giants (big bones, keys)"),
+		LESSER_DEMONS("Lesser Demons (magic safespot)");
+
+		private final String label;
+		MonsterTarget(String label) { this.label = label; }
 		@Override public String toString() { return label; }
 	}
 
@@ -53,6 +66,13 @@ public class Config {
 	public int jadesPerWorld = 20;
 	public int soulRunesMinStock = 0;
 	public boolean membersWorldsOnly = true;
+
+	/* ---- Monsters (training / F2P money) ---- */
+	public MonsterTarget monster = MonsterTarget.HILL_GIANTS;
+	public String monsterNameOverride = "";
+	public boolean monsterSafespot = true;
+	public int monsterLootValue = 200;
+	public boolean useFoodForMonsters = true;
 
 	/* ---- Antiban ---- */
 	public boolean antibanEnabled = true;

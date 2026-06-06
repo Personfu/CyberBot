@@ -5,6 +5,7 @@ import nezz.dreambot.aio.boss.BossTask;
 import nezz.dreambot.aio.gui.AIOGui;
 import nezz.dreambot.aio.gui.Config;
 import nezz.dreambot.aio.money.*;
+import nezz.dreambot.aio.monster.MonsterFarmTask;
 import nezz.dreambot.aio.paint.Paint;
 import nezz.dreambot.aio.security.RuneGuardClient;
 import nezz.dreambot.aio.task.StatsProvider;
@@ -88,6 +89,9 @@ public class AIOScript extends AbstractScript {
 	private Task buildModule() {
 		if (cfg.activity == Config.Activity.BOSS) {
 			return new BossTask(cfg);
+		}
+		if (cfg.activity == Config.Activity.MONSTERS) {
+			return new MonsterFarmTask(cfg);
 		}
 		switch (cfg.module) {
 			case JADE_TRADING_STICKS: return new JadeTradingSticksTask(cfg);

@@ -27,6 +27,7 @@ public class AIOGui extends JFrame {
 		JTabbedPane tabs = new JTabbedPane();
 		tabs.addTab("Money", buildMoneyTab(cfg));
 		tabs.addTab("Bossing", buildBossTab(cfg));
+		tabs.addTab("Monsters", buildMonsterTab(cfg));
 		tabs.addTab("Antiban", buildAntibanTab(cfg));
 		tabs.addTab("Webhooks", buildWebhookTab(cfg));
 		tabs.addTab("RuneGuard", buildRuneGuardTab(cfg));
@@ -113,6 +114,38 @@ public class AIOGui extends JFrame {
 		JCheckBox flick = new JCheckBox("Flick Protect from Melee", cfg.flickProtectMelee);
 		flick.addActionListener(e -> cfg.flickProtectMelee = flick.isSelected());
 		p.add(flick);
+		return p;
+	}
+
+	private JPanel buildMonsterTab(Config cfg) {
+		JPanel p = grid();
+		p.add(new JLabel("Target:"));
+		JComboBox<Config.MonsterTarget> box = new JComboBox<>(Config.MonsterTarget.values());
+		box.setSelectedItem(cfg.monster);
+		box.addActionListener(e -> cfg.monster = (Config.MonsterTarget) box.getSelectedItem());
+		p.add(box);
+
+		p.add(new JLabel("NPC name override (optional):"));
+		JTextField name = new JTextField(cfg.monsterNameOverride);
+		name.addFocusListener(new java.awt.event.FocusAdapter() {
+			public void focusLost(java.awt.event.FocusEvent e) {
+				cfg.monsterNameOverride = name.getText().trim();
+			}
+		});
+		p.add(name);
+
+		p.add(new JLabel("Min loot value to pick up:"));
+		JSpinner loot = new JSpinner(new SpinnerNumberModel(cfg.monsterLootValue, 0, 1_000_000, 100));
+		loot.addChangeListener(e -> cfg.monsterLootValue = (int) loot.getValue());
+		p.add(loot);
+
+		JCheckBox safespot = new JCheckBox("Use safespot (ranged/magic targets)", cfg.monsterSafespot);
+		safespot.addActionListener(e -> cfg.monsterSafespot = safespot.isSelected());
+		p.add(safespot);
+
+		JCheckBox food = new JCheckBox("Bank/eat food", cfg.useFoodForMonsters);
+		food.addActionListener(e -> cfg.useFoodForMonsters = food.isSelected());
+		p.add(food);
 		return p;
 	}
 
