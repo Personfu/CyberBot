@@ -1,0 +1,9 @@
+package org.dreambot.api.methods.magic;
+public enum Normal implements Spell {
+  WIND_STRIKE, WATER_STRIKE, EARTH_STRIKE, FIRE_STRIKE,
+  WIND_BOLT, WATER_BOLT, EARTH_BOLT, FIRE_BOLT,
+  WIND_BLAST, WATER_BLAST, EARTH_BLAST, FIRE_BLAST,
+  WIND_WAVE, WATER_WAVE, EARTH_WAVE, FIRE_WAVE,
+  HIGH_LEVEL_ALCHEMY, LOW_LEVEL_ALCHEMY, SUPERHEAT_ITEM;
+  public String getName(){return name();}
+}

@@ -28,6 +28,8 @@ public class AIOGui extends JFrame {
 		tabs.addTab("Money", buildMoneyTab(cfg));
 		tabs.addTab("Bossing", buildBossTab(cfg));
 		tabs.addTab("Monsters", buildMonsterTab(cfg));
+		tabs.addTab("Combat Trainer", buildCombatTrainerTab(cfg));
+		tabs.addTab("Magic", buildMagicTab(cfg));
 		tabs.addTab("Antiban", buildAntibanTab(cfg));
 		tabs.addTab("Webhooks", buildWebhookTab(cfg));
 		tabs.addTab("RuneGuard", buildRuneGuardTab(cfg));
@@ -146,6 +148,85 @@ public class AIOGui extends JFrame {
 		JCheckBox food = new JCheckBox("Bank/eat food", cfg.useFoodForMonsters);
 		food.addActionListener(e -> cfg.useFoodForMonsters = food.isSelected());
 		p.add(food);
+		return p;
+	}
+
+	private JPanel buildCombatTrainerTab(Config cfg) {
+		JPanel p = grid();
+		p.add(new JLabel("Auto-picks targets based on your combat level."));
+		p.add(new JLabel("Progression: Chickens -> Cows -> Warriors -> Hill Giants -> ..."));
+
+		JCheckBox food = new JCheckBox("Bank/eat food", cfg.useFoodForCombatTrainer);
+		food.addActionListener(e -> cfg.useFoodForCombatTrainer = food.isSelected());
+		p.add(food);
+
+		JCheckBox safespot = new JCheckBox("Use safespot if available", cfg.combatTrainerSafespot);
+		safespot.addActionListener(e -> cfg.combatTrainerSafespot = safespot.isSelected());
+		p.add(safespot);
+
+		p.add(new JLabel("Min loot value to pick up:"));
+		JSpinner loot = new JSpinner(new SpinnerNumberModel(cfg.combatTrainerLootValue, 0, 1_000_000, 100));
+		loot.addChangeListener(e -> cfg.combatTrainerLootValue = (int) loot.getValue());
+		p.add(loot);
+		return p;
+	}
+
+	private JPanel buildMagicTab(Config cfg) {
+		JPanel p = grid();
+		p.add(new JLabel("Mode:"));
+		JComboBox<Config.MagicMode> mode = new JComboBox<>(Config.MagicMode.values());
+		mode.setSelectedItem(cfg.magicMode);
+		mode.addActionListener(e -> cfg.magicMode = (Config.MagicMode) mode.getSelectedItem());
+		p.add(mode);
+
+		p.add(new JLabel("High Alch item name:"));
+		JTextField alch = new JTextField(cfg.magicAlchItem);
+		alch.addFocusListener(new java.awt.event.FocusAdapter() {
+			public void focusLost(java.awt.event.FocusEvent e) {
+				cfg.magicAlchItem = alch.getText().trim();
+			}
+		});
+		p.add(alch);
+
+		p.add(new JLabel("Combat spell (e.g. FIRE_STRIKE, WIND_BOLT):"));
+		JTextField spell = new JTextField(cfg.magicSpell);
+		spell.addFocusListener(new java.awt.event.FocusAdapter() {
+			public void focusLost(java.awt.event.FocusEvent e) {
+				cfg.magicSpell = spell.getText().trim();
+			}
+		});
+		p.add(spell);
+
+		p.add(new JLabel("Target NPC name (combat cast):"));
+		JTextField npc = new JTextField(cfg.magicTargetNpc);
+		npc.addFocusListener(new java.awt.event.FocusAdapter() {
+			public void focusLost(java.awt.event.FocusEvent e) {
+				cfg.magicTargetNpc = npc.getText().trim();
+			}
+		});
+		p.add(npc);
+
+		p.add(new JLabel("Anchor tile x,y,z (optional):"));
+		JTextField anchor = new JTextField(cfg.magicAnchorTileStr);
+		anchor.addFocusListener(new java.awt.event.FocusAdapter() {
+			public void focusLost(java.awt.event.FocusEvent e) {
+				cfg.magicAnchorTileStr = anchor.getText().trim();
+			}
+		});
+		p.add(anchor);
+
+		p.add(new JLabel("Safespot tile x,y,z (optional):"));
+		JTextField safe = new JTextField(cfg.magicSafespotTileStr);
+		safe.addFocusListener(new java.awt.event.FocusAdapter() {
+			public void focusLost(java.awt.event.FocusEvent e) {
+				cfg.magicSafespotTileStr = safe.getText().trim();
+			}
+		});
+		p.add(safe);
+
+		JCheckBox ss = new JCheckBox("Hold safespot tile", cfg.magicSafespot);
+		ss.addActionListener(e -> cfg.magicSafespot = ss.isSelected());
+		p.add(ss);
 		return p;
 	}
 
